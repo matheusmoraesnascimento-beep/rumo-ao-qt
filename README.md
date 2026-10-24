@@ -19,6 +19,7 @@ Ferramenta independente de estudos. Não oficial e sem vínculo com a Marinha do
 | Edital 2026 (provisório) em árvore, status/confiança/anotações, check-in de teoria + card | Real (158 tópicos) |
 | Agenda: cronômetro pausável, sessão retroativa, disponibilidade por dia, dias bloqueados | Real |
 | Banco de 250 questões: filtros, imagem original por padrão, resposta + autoavaliação + confiança, favoritas, tags, classificação por tópico, relato de OCR | Real |
+| Classificação em lote das questões por tópico (/questoes/classificar): recorte ao lado, sugestões por palavras-chave (apoio, nunca gravam sozinhas), atalhos de teclado | Real |
 | Simulados de 50: por ano (ordem original) ou misto com semente, cronômetro, retomada, revisão antes de finalizar | Real |
 | Revisões espaçadas `interval-v1`, RPC atômica + idempotente, fila limitada, remarcação com log | Real |
 | Oficina de redação: temas autorais navais/nacionais, rascunho automático, versões, timer, rubrica pedagógica | Real |

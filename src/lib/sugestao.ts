@@ -24,7 +24,7 @@ export const KEYWORD_DEFS: MacroDef[] = [
       'Em camadas': ['arquitetura em camadas do sistema operacional'],
       'Virtualização': ['hipervisor', 'virtualizacao', 'maquina virtual', 'container'],
       Escalonamento: ['escalonamento', 'round robin', 'fcfs', 'sjf', 'quantum'],
-      Threads: ['thread'],
+      Threads: ['threads', 'multithread'],
       'Sincronização e deadlock': ['deadlock', 'semaforo', 'mutex', 'condicao de corrida', 'inanicao'],
       'Paginação e segmentação': ['paginacao', 'segmentacao', 'tlb', 'lru'],
       'Memória virtual': ['memoria virtual', 'swap', 'thrashing'],
@@ -38,9 +38,9 @@ export const KEYWORD_DEFS: MacroDef[] = [
   },
   {
     macro: 'Organização e Arquitetura de Computadores',
-    keywords: ['complemento de 2', 'complemento a 2', 'hexadecimal', 'binario', 'overflow', 'porta logica', 'portas logicas', 'booleana', 'nand', 'xor', 'cache', 'memoria cache', 'pipeline', 'risc', 'cisc', 'instrucao', 'registrador', 'cpu', 'processador', 'microarquitetura', 'barramento', 'dma', 'paralel', 'multiprocessador', 'flynn', 'simd', 'mimd', 'ula', 'clock', 'endereçamento imediato'],
+    keywords: ['complemento de 2', 'complemento a 2', 'hexadecimal', 'sistema binario', 'overflow', 'porta logica', 'portas logicas', 'booleana', 'nand', 'xor', 'cache', 'memoria cache', 'pipeline', 'risc', 'cisc', 'instrucao', 'registrador', 'cpu', 'processador', 'microarquitetura', 'barramento', 'dma', 'paralel', 'multiprocessador', 'flynn', 'simd', 'mimd', 'ula', 'clock', 'endereçamento imediato'],
     leaves: {
-      'Bases binária e hexadecimal': ['hexadecimal', 'base 2', 'base 16', 'binario'],
+      'Bases binária e hexadecimal': ['hexadecimal', 'base 2', 'base 16', 'sistema binario', 'conversao de base', 'numero binario'],
       'Complemento de 2 e overflow': ['complemento de 2', 'complemento a 2', 'overflow'],
       'Álgebra booleana': ['booleana', 'de morgan', 'mapa de karnaugh', 'karnaugh'],
       'Portas lógicas': ['porta logica', 'portas logicas', 'nand', 'nor', 'xor'],
@@ -52,7 +52,7 @@ export const KEYWORD_DEFS: MacroDef[] = [
   },
   {
     macro: 'Redes de Computadores',
-    keywords: ['rede', 'redes', 'osi', 'tcp', 'udp', 'ip ', 'ipv4', 'ipv6', 'dns', 'http', 'https', 'roteamento', 'roteador', 'switch', 'vlan', 'ethernet', 'wi-fi', 'wifi', 'wireless', 'mascara de sub', 'sub-rede', 'sub rede', 'gateway', 'dhcp', 'arp', 'icmp', 'bgp', 'ospf', 'rip', 'nat', 'porta', 'camada de', 'encapsulamento', 'topologia', 'fibra optica', 'par trancado', 'csma', 'lan', 'wan', 'cidr', 'smtp', 'ftp', 'socket'],
+    keywords: ['redes de computadores', 'osi', 'tcp', 'udp', 'ip ', 'ipv4', 'ipv6', 'dns', 'http', 'https', 'roteamento', 'roteador', 'switch', 'vlan', 'ethernet', 'wi-fi', 'wifi', 'wireless', 'sem fio', 'mascara de sub', 'sub-rede', 'sub rede', 'gateway', 'dhcp', 'arp', 'icmp', 'bgp', 'ospf', 'rip', 'nat', 'camada de enlace', 'camada de rede', 'camada de transporte', 'encapsulamento', 'topologia', 'fibra optica', 'par trancado', 'csma', 'lan', 'wan', 'cidr', 'smtp', 'ftp', 'socket'],
     leaves: {
       Encapsulamento: ['encapsulamento', 'pdu'],
       'Camada de enlace': ['enlace', 'ethernet', 'csma', 'quadro', 'mac '],
@@ -103,7 +103,7 @@ export const KEYWORD_DEFS: MacroDef[] = [
   },
   {
     macro: 'Linguagens de Programação',
-    keywords: ['java', 'python', 'classe', 'objeto', 'heranca', 'polimorfismo', 'interface', 'generics', 'stream', 'lambda', 'thread', 'exception', 'excecao', 'try', 'catch', 'public static', 'import ', 'def ', 'lista', 'dicionario', 'tupla', 'escopo', 'tipagem', 'compilador', 'interpretador', 'lexic', 'sintatic', 'gramatica', 'linguagem', 'serializable', 'collection', 'hashmap', 'arraylist', 'string ', 'int ', 'void'],
+    keywords: ['java', 'python', 'classe', 'heranca', 'polimorfismo', 'generics', 'stream', 'lambda', 'exception', 'excecao', 'public static', 'def ', 'dicionario', 'tupla', 'tipagem', 'compilador', 'interpretador', 'lexic', 'sintatic', 'linguagem de programacao', 'serializable', 'hashmap', 'arraylist', 'programacao orientada', 'orientacao a objetos'],
     leaves: {
       'Sintaxe e semântica': ['sintaxe', 'semantica', 'gramatica', 'bnf'],
       'Análise léxica e sintática': ['lexic', 'sintatic', 'token', 'parser', 'automato'],
@@ -136,15 +136,15 @@ export const KEYWORD_DEFS: MacroDef[] = [
   },
   {
     macro: 'Gerência de Projetos',
-    keywords: ['projeto', 'pmbok', 'pmo', 'escritorio de gerenciamento', 'escopo', 'cronograma', 'custo', 'risco', 'stakeholder', 'parte interessada', 'eap', 'wbs', 'caminho critico', 'pert', 'cpm', 'valor agregado', 'evm', 'termo de abertura', 'estrutura organizacional', 'matricial', 'funcional', 'gerente de projetos', 'grupo de processos', 'heldman', 'comunicacao', 'equipe'],
+    keywords: ['pmbok', 'pmo', 'escritorio de gerenciamento', 'gerenciamento de projetos', 'gerente de projetos', 'escopo do projeto', 'cronograma', 'stakeholder', 'parte interessada', 'eap', 'wbs', 'caminho critico', 'pert', 'cpm', 'valor agregado', 'evm', 'termo de abertura', 'estrutura organizacional', 'matricial', 'grupo de processos', 'heldman', 'gerenciamento de custos', 'gerenciamento de riscos', 'ciclo de vida do projeto', 'atividade do projeto'],
     leaves: {
-      'PMBOK: ciclo de vida e grupos de processos': ['pmbok', 'ciclo de vida', 'grupo de processos', 'iniciacao', 'encerramento', 'termo de abertura'],
-      Escopo: ['escopo', 'eap', 'wbs'],
+      'PMBOK: ciclo de vida e grupos de processos': ['pmbok', 'ciclo de vida do projeto', 'grupo de processos', 'termo de abertura'],
+      Escopo: ['escopo do projeto', 'eap', 'wbs', 'declaracao do escopo'],
       Cronograma: ['cronograma', 'caminho critico', 'pert', 'cpm', 'folga'],
-      Custos: ['custo', 'valor agregado', 'evm', 'orcamento'],
-      'Comunicação': ['comunicacao', 'canais de comunicacao'],
-      Riscos: ['risco', 'mitigar', 'transferir', 'aceitar'],
-      Equipe: ['equipe', 'recursos humanos', 'tuckman', 'motivacao'],
+      Custos: ['gerenciamento de custos', 'valor agregado', 'evm', 'orcamento do projeto', 'estimativa de custos'],
+      'Comunicação': ['plano de comunicacao', 'canais de comunicacao', 'gerenciamento das comunicacoes'],
+      Riscos: ['gerenciamento de riscos', 'registro de riscos', 'risco do projeto'],
+      Equipe: ['equipe do projeto', 'tuckman', 'recursos humanos do projeto'],
       'Estruturas organizacionais': ['estrutura organizacional', 'matricial', 'funcional', 'projetizada', 'pmo', 'escritorio de gerenciamento'],
     },
   },
@@ -192,7 +192,7 @@ export const KEYWORD_DEFS: MacroDef[] = [
   },
   {
     macro: 'Governança de TI',
-    keywords: ['governanca', 'cobit', 'itil', 'iso 20000', 'iso 38500', 'gestao de servicos', 'catalogo de servicos', 'sla', 'incidente', 'problema', 'mudanca', 'service desk', 'valor de ti', 'alinhamento estrategico', 'cmmi', 'mps.br', 'togaf', 'bsc', 'balanced scorecard'],
+    keywords: ['governanca', 'cobit', 'itil', 'iso 20000', 'iso 38500', 'gestao de servicos', 'catalogo de servicos', 'sla', 'incidente', 'gestao de incidentes', 'service desk', 'valor de ti', 'alinhamento estrategico', 'cmmi', 'mps.br', 'togaf', 'bsc', 'balanced scorecard'],
     leaves: {
       'Papéis e modelos de governança': ['governanca', 'iso 38500', 'alinhamento estrategico', 'papeis'],
       'Gestão de serviços e processos': ['itil', 'iso 20000', 'gestao de servicos', 'incidente', 'service desk', 'sla', 'catalogo de servicos'],

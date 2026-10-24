@@ -71,6 +71,7 @@ export default function Questoes() {
           <Button size="sm" variant="secondary" onClick={() => setParams({ modo: 'erros' })}>Que errei</Button>
           <Button size="sm" variant="secondary" onClick={() => setParams({ modo: '2026' })}>Questões de 2026</Button>
           <Button size="sm" variant="secondary" onClick={() => setParams({})}>Limpar filtros</Button>
+          <Link to="/questoes/classificar"><Button size="sm" variant="secondary">Classificar em lote</Button></Link>
           <span className="mx-1 self-center text-sm text-muted">Rodada rápida:</span>
           {[5, 10, 20].map((n) => <Button key={n} size="sm" onClick={() => round(n)}>{n}</Button>)}
           <Button size="sm" variant="secondary" onClick={() => start(balancedMix(list, ctx, Math.min(20, list.length), `mix-${Date.now()}`).map((q) => q.id))}>Mistura equilibrada (20)</Button>

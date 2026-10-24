@@ -111,6 +111,16 @@ export async function setUserQuestionTopic(question_id: string, topic_id: string
   else ok(await supabase.from('user_question_topics').delete().eq('question_id', question_id).eq('topic_id', topic_id))
 }
 
+/** Substitui a classificação do usuário para uma questão (remove o que saiu, insere o que entrou). */
+export async function replaceQuestionTopics(question_id: string, topicIds: string[]) {
+  const u = await uid()
+  const del = supabase.from('user_question_topics').delete().eq('question_id', question_id)
+  ok(topicIds.length ? await del.not('topic_id', 'in', `(${topicIds.join(',')})`) : await del)
+  if (topicIds.length) {
+    ok(await supabase.from('user_question_topics').upsert(topicIds.map((topic_id) => ({ user_id: u, question_id, topic_id })), { onConflict: 'user_id,question_id,topic_id' }))
+  }
+}
+
 // ---- simulados ----
 export const getSimulations = async () =>
   ok(await supabase.from('simulations').select('*').order('started_at', { ascending: false })) as Simulation[]

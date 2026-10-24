@@ -10,6 +10,7 @@
 | Filtros/backup | `tests/filtros-backup.test.ts` | filtros, mistura, CSV, restauração |
 | UI | `tests/ui.test.tsx`, `tests/gabarito-ui.test.tsx` | imagem por padrão, 21/50 só como base, retomada de simulado, revisão antes de finalizar, gabarito só após responder, marcação ANULADA, conferência do simulado |
 | Auth | `tests/auth.test.tsx` | cadastro, login, validação, logout/sessão, recuperação de senha |
+| Classificação em lote | `tests/classificar.test.tsx`, `tests/sugestao.test.ts` | sugestão por OCR sem gravar, seleção, salvar/avançar, atalhos, progresso, erro de rede; dicionário x edital |
 | Redação | `tests/redacao.test.tsx` | autosave, versões, rótulos não oficiais |
 | E2E | `tests/e2e/smoke.spec.ts` | build em `/rumo-ao-qt/`, deep link/refresh, mobile sem scroll horizontal, provas não servidas pelo Pages |
 

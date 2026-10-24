@@ -10,6 +10,7 @@ const Edital = lazy(() => import('@/features/edital/Edital'))
 const Agenda = lazy(() => import('@/features/calendario/Agenda'))
 const Questoes = lazy(() => import('@/features/questoes/Questoes'))
 const QuestaoPage = lazy(() => import('@/features/questoes/QuestaoPage'))
+const Classificar = lazy(() => import('@/features/questoes/Classificar'))
 const Simulados = lazy(() => import('@/features/simulados/Simulados'))
 const SimuladoRun = lazy(() => import('@/features/simulados/SimuladoRun'))
 const Revisoes = lazy(() => import('@/features/revisoes/Revisoes'))
@@ -28,6 +29,7 @@ export function App() {
           <Route path="edital" element={<Edital />} />
           <Route path="agenda" element={<Agenda />} />
           <Route path="questoes" element={<Questoes />} />
+          <Route path="questoes/classificar" element={<Classificar />} />
           <Route path="questoes/:id" element={<QuestaoPage />} />
           <Route path="simulados" element={<Simulados />} />
           <Route path="simulados/:id" element={<SimuladoRun />} />
