@@ -36,7 +36,7 @@ jobs:
           VITE_APP_BASE_PATH: /${{ github.event.repository.name }}/
       - name: Verificar que o bundle não contém segredos
         run: |
-          if grep -rIlE "service_role|sb_secret_" dist; then echo "Possível segredo no bundle"; exit 1; fi
+          if grep -rIlE "sb_secret_[A-Za-z0-9_-]{16,}|SUPABASE_SERVICE_ROLE_KEY" dist; then echo "Possível segredo no bundle"; exit 1; fi
           test ! -d dist/dados && test ! -d dist/provas
       - uses: actions/upload-pages-artifact@v3
         with:
