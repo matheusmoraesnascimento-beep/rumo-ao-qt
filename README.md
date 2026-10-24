@@ -49,6 +49,7 @@ Sem `.env.local` o app abre na tela "Configuração pendente" (não quebra).
    1. `supabase/migrations/20261023000001_schema.sql`
    2. `supabase/migrations/20261023000002_rls_rpc.sql`
    3. `supabase/migrations/20261023000003_storage.sql`
+   3b. `supabase/migrations/20261024000004_storage_admin_upload.sql` (permite que administradores enviem recortes sem usar a service_role)
    4. `supabase/seed.sql` (provas, edital provisório, temas de redação)
    5. `supabase/seed_questoes.sql` (250 questões; gerado localmente, **não vai ao Git** — veja "Provas e direitos")
 
@@ -65,6 +66,7 @@ Sem `.env.local` o app abre na tela "Configuração pendente" (não quebra).
    npm run enviar:imagens
    ```
    Feche o terminal depois. A chave `service_role` nunca entra em arquivo versionado.
+   Alternativa sem `service_role`: insira seu usuário em `public.admins` (SQL) e envie os recortes autenticado como esse administrador; usuários comuns só têm leitura do bucket.
 
 ## 3. Publicar no GitHub Pages
 
