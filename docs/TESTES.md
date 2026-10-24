@@ -11,6 +11,7 @@
 | UI | `tests/ui.test.tsx`, `tests/gabarito-ui.test.tsx` | imagem por padrão, 21/50 só como base, retomada de simulado, revisão antes de finalizar, gabarito só após responder, marcação ANULADA, conferência do simulado |
 | Auth | `tests/auth.test.tsx` | cadastro, login, validação, logout/sessão, recuperação de senha |
 | Classificação em lote | `tests/classificar.test.tsx`, `tests/sugestao.test.ts` | sugestão por OCR sem gravar, seleção, salvar/avançar, atalhos, progresso, erro de rede; dicionário x edital |
+| Lembrete e PWA | `tests/db/lembretes.test.ts`, `tests/lembretes.test.ts`, `tests/lembretes-ui.test.tsx`, `tests/e2e/pwa.spec.ts` | token do remetente, janela/fuso/dia bloqueado/1 por dia, RLS das inscrições; mensagem; ligar/desligar; manifest, service worker em subpasta, abrir sem rede, evento push real virando notificação |
 | Redação | `tests/redacao.test.tsx` | autosave, versões, rótulos não oficiais |
 | E2E | `tests/e2e/smoke.spec.ts` | build em `/rumo-ao-qt/`, deep link/refresh, mobile sem scroll horizontal, provas não servidas pelo Pages |
 

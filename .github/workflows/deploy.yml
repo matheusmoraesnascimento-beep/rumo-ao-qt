@@ -33,6 +33,7 @@ jobs:
           # Valores PÚBLICOS (anon/publishable). Defina em Settings > Secrets and variables > Actions > Variables.
           VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
+          VITE_VAPID_PUBLIC_KEY: ${{ vars.VITE_VAPID_PUBLIC_KEY }}
           VITE_APP_BASE_PATH: /${{ github.event.repository.name }}/
       - name: Verificar que o bundle não contém segredos
         run: |

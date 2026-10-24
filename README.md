@@ -25,8 +25,9 @@ Ferramenta independente de estudos. Não oficial e sem vínculo com a Marinha do
 | Oficina de redação: temas autorais navais/nacionais, rascunho automático, versões, timer, rubrica pedagógica | Real |
 | Análise: heatmap, por ano/tópico/OCR, tempo × cobertura, 2022–2025 × 2026 (só com dados classificados) | Real |
 | Config: metas, data da prova ("a confirmar"), exportação CSV/JSON, backup/restauração | Real |
+| App instalável (PWA) + lembrete diário por Web Push (revisões vencidas ou convite de estudo; não envia em dia bloqueado; 1 por dia; janela de 3 h) | Real; envio por GitHub Actions agendado, sem servidor |
 
-**Não implementado (honesto):** editor `/admin/conferencia` de OCR (a revisão é feita por SQL/CLI, veja `docs/IMPORTACAO_QUESTOES.md`); PWA/offline; FSRS; IA para redação; gráfico de evolução usa só simulados com autoavaliação.
+**Não implementado (honesto):** editor `/admin/conferencia` de OCR (a revisão é feita por SQL/CLI, veja `docs/IMPORTACAO_QUESTOES.md`); modo offline de verdade (o app abre sem rede, mas dados e gravações exigem internet); FSRS; IA para redação.
 
 ## Pré-requisitos
 
@@ -52,6 +53,7 @@ Sem `.env.local` o app abre na tela "Configuração pendente" (não quebra).
    3. `supabase/migrations/20261023000003_storage.sql`
    3b. `supabase/migrations/20261024000004_storage_admin_upload.sql` (permite que administradores enviem recortes sem usar a service_role)
    3c. `supabase/migrations/20261024000005_answer_keys.sql` (gabaritos oficiais, RPCs de conferência e marcação de anuladas)
+   3d. `supabase/migrations/20261024000006_push_reminders.sql` (inscrições de push, horário do lembrete e RPCs do remetente)
    4. `supabase/seed.sql` (provas, edital provisório, temas de redação)
    5. `supabase/seed_questoes.sql` (250 questões; gerado localmente, **não vai ao Git** — veja "Provas e direitos")
    6. `supabase/seed_gabaritos.sql` (gerado com `npm run gabaritos:extrair` e `npm run gabaritos:seed` a partir dos PDFs oficiais; **não vai ao Git** — veja `docs/IMPORTACAO_QUESTOES.md`)
@@ -82,6 +84,29 @@ Sem `.env.local` o app abre na tela "Configuração pendente" (não quebra).
 5. Acesse `https://SEU-USUARIO.github.io/NOME-DO-REPO/`, crie sua conta e confirme o e-mail.
 
 Rotas ficam em `/NOME-DO-REPO/#/estudos`; refresh e deep link funcionam sem regras de rewrite.
+
+## 4. App instalável e lembrete diário (Web Push)
+
+O app é um **PWA**: no Chrome/Edge/Android aparece "Instalar app" em **Config**; no iPhone use Compartilhar → Adicionar à Tela de Início (o push no iOS só funciona com o app instalado, iOS 16.4+). O service worker guarda só o casco estático: com internet o app sempre busca dados novos; **sem internet ele abre, mas não há dados nem gravações** (não é modo offline).
+
+O lembrete chega com o app **fechado**, sem servidor próprio:
+
+1. Você liga o lembrete em **Config → Instalar o app e lembrete diário** (permissão do navegador + horário). A inscrição fica em `push_subscriptions` (só você a vê).
+2. Um workflow agendado (`.github/workflows/lembretes.yml`, a cada 30 min) roda `scripts/enviar-lembretes.ts`, que chama `reminders_due` no Supabase. **Não usa `service_role`**: a chamada é autorizada por um token próprio (`REMINDER_BOT_TOKEN`) cujo **hash** fica em `reminder_bots`; o token é revogável (`update reminder_bots set revoked_at = now()`).
+3. Regras (no banco): horário local do usuário + janela de 3 h, no máximo 1 por dia, nada em dia bloqueado; com revisões vencidas avisa a quantidade; sem revisões só convida a estudar se você não estudou nas últimas 20 h. Inscrições expiradas (404/410) são removidas.
+
+Configuração única (já feita neste projeto; refaça se criar outro):
+
+```bash
+npx web-push generate-vapid-keys --json     # gera o par de chaves
+# Settings > Secrets and variables > Actions:
+#   Variable  VITE_VAPID_PUBLIC_KEY  = chave pública (vai no build do site)
+#   Secret    VAPID_PRIVATE_KEY      = chave privada (só o workflow de lembretes lê)
+#   Secret    REMINDER_BOT_TOKEN     = string aleatória de 64 hex; no banco insira só o hash:
+#   insert into reminder_bots (name, token_hash) values ('github-actions', encode(sha256('<TOKEN>'::bytea), 'hex'));
+```
+
+Teste sem enviar nada: **Actions → Lembretes diários → Run workflow** (marcado como *dry run*). Atenção: o GitHub pausa workflows agendados após 60 dias sem atividade no repositório.
 
 ## Provas e direitos (decisão)
 

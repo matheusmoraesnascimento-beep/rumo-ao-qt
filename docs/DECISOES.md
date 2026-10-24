@@ -15,4 +15,6 @@
 | Redação | Temas autorais navais/nacionais (`official=false`); rubrica pedagógica editável | Sem nota oficial inventada |
 | Editor OCR `/admin` | Não publicado | Exigiria papel de admin verificado no servidor; revisão por SQL/CLI |
 | shadcn/ui | Componentes próprios em Tailwind (`src/components/ui.tsx`) no estilo shadcn | Menos dependências; podem ser trocados |
-| Offline/PWA | Não implementado | Não prometer sync sem reconciliação |
+| Modo offline | Não implementado | Não prometer sync sem reconciliação |
+| Lembrete diário | Web Push enviado por GitHub Actions agendado (30 min), autorizado por token próprio revogável (hash em `reminder_bots`), sem `service_role` | Sem servidor e sem expor chave privilegiada; trade-off: atraso de minutos e pausa do GitHub após 60 dias sem atividade |
+| PWA | Service worker só do casco estático; sem `skipWaiting`; outras origens (Supabase) nunca interceptadas | Dados sempre frescos; versão nova não quebra abas abertas; não promete offline |

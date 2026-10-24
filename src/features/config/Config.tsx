@@ -6,6 +6,7 @@ import { deleteAccount, saveProfile, saveSettings } from '@/lib/api'
 import { supabase } from '@/lib/supabase'
 import { errMsg } from '@/lib/utils'
 import { applyTheme } from '@/app/Layout'
+import { Lembretes } from './Lembretes'
 import { buildBackup, downloadText, restoreBackup, toCsv } from '@/lib/backup'
 
 export default function Config() {
@@ -51,6 +52,8 @@ export default function Config() {
         <div className="sm:col-span-2 flex items-center gap-3"><Button onClick={save} loading={busy}>Salvar</Button>{msg && <span role={msg.ok ? 'status' : 'alert'} className={`text-sm ${msg.ok ? 'text-ok' : 'text-bad'}`}>{msg.t}</span>}</div>
         <p className="text-xs text-muted sm:col-span-2">Disponibilidade por dia e dias bloqueados: tela Agenda.</p>
       </Card>
+
+      <Lembretes />
 
       <Card className="space-y-3">
         <h2 className="font-semibold">Exportar / backup / restaurar</h2>

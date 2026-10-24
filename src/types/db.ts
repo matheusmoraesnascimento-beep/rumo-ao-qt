@@ -29,6 +29,7 @@ export interface Settings {
   daily_review_cap: number; weekly_availability: Record<string, number>
   writing_cadence: string; include_writing: boolean; min_new_topic_share: number
   theme: 'system' | 'light' | 'dark'
+  reminder_enabled: boolean; reminder_time: string
 }
 export interface TopicProgress {
   user_id: string; topic_id: string; status: TopicStatus; confidence: number

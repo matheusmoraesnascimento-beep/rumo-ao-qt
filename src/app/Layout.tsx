@@ -3,6 +3,7 @@ import { useEffect } from 'react'
 import { BarChart3, BookOpen, CalendarDays, ClipboardList, Home, ListChecks, PenLine, RotateCcw, Settings as Cog, Anchor } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useSettings } from '@/lib/queries'
+import { useOnline } from '@/lib/pwa'
 
 const NAV = [
   { to: '/', label: 'Hoje', icon: Home, end: true },
@@ -25,6 +26,7 @@ export function applyTheme(t: 'system' | 'light' | 'dark') {
 
 export function Layout() {
   const { data: s } = useSettings()
+  const online = useOnline()
   useEffect(() => { if (s?.theme) applyTheme(s.theme) }, [s?.theme])
   return (
     <div className="min-h-screen md:flex">
@@ -41,6 +43,7 @@ export function Layout() {
         <p className="px-2 text-[11px] leading-snug text-white/70">Ferramenta independente de estudos. Não oficial e sem vínculo com a Marinha do Brasil.</p>
       </aside>
       <div className="flex min-w-0 flex-1 flex-col">
+        {!online && <p role="status" className="bg-warn/15 px-4 py-2 text-center text-sm text-warn">Sem conexão: o app abre, mas os dados e as gravações dependem da internet. Nada é salvo offline.</p>}
         <main id="conteudo" className="mx-auto w-full max-w-5xl flex-1 p-4 pb-24 md:pb-8">
           <Outlet />
         </main>

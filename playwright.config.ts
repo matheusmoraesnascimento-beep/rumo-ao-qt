@@ -9,14 +9,15 @@ export default defineConfig({
   timeout: 30_000,
   use: { baseURL: 'http://localhost:4173' },
   projects: [
-    { name: 'desktop', use: { ...devices['Desktop Chrome'] } },
-    { name: 'mobile', use: { ...devices['Pixel 7'] } },
+    { name: 'desktop', use: { ...devices['Desktop Chrome'], channel: 'chromium' } },
+    { name: 'mobile', use: { ...devices['Pixel 7'], channel: 'chromium' } },
   ],
   webServer: {
     command: 'npx vite build && npx vite preview --port 4173 --strictPort',
     url: 'http://localhost:4173/rumo-ao-qt/',
     reuseExistingServer: true,
     timeout: 120_000,
-    env: { VITE_APP_BASE_PATH: '/rumo-ao-qt/', VITE_CONFIG_NATIVE_IGNORE_WARNING: 'true' },
+    // Variáveis do processo vencem o .env.local: o E2E nunca fala com o Supabase real.
+    env: { VITE_APP_BASE_PATH: '/rumo-ao-qt/', VITE_CONFIG_NATIVE_IGNORE_WARNING: 'true', VITE_SUPABASE_URL: '', VITE_SUPABASE_ANON_KEY: '', VITE_VAPID_PUBLIC_KEY: 'BNcRdreALRFXTkOOUHK1EtK2wtaz5Ry4YfYCA_0QTpQtUbVlUls0VJXg7A8u-Ts1XbjhazAkj7I99e8QcYP7DkM' },
   },
 })

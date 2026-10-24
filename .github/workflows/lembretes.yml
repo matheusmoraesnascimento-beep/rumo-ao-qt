@@ -1,0 +1,39 @@
+name: Lembretes diários (Web Push)
+
+on:
+  schedule:
+    - cron: '*/30 * * * *'   # a cada 30 min; o banco decide quem está na janela do horário escolhido
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Só listar (não enviar nem marcar como enviado)'
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: lembretes
+  cancel-in-progress: false
+
+jobs:
+  enviar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --legacy-peer-deps
+      - name: Enviar lembretes
+        run: npx tsx scripts/enviar-lembretes.ts
+        env:
+          SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
+          VAPID_PUBLIC_KEY: ${{ vars.VITE_VAPID_PUBLIC_KEY }}
+          VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
+          REMINDER_BOT_TOKEN: ${{ secrets.REMINDER_BOT_TOKEN }}
+          DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run && '1' || '0' }}

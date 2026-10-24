@@ -200,6 +200,18 @@ export async function uploadAttachment(submissionId: string, file: File): Promis
   return path
 }
 
+// ---- lembrete diário (Web Push) ----
+export async function savePushSubscription(s: { endpoint: string; p256dh: string; auth: string }) {
+  const u = await uid()
+  ok(await supabase.from('push_subscriptions').delete().eq('endpoint', s.endpoint)) // inscrição antiga deste navegador
+  ok(await supabase.from('push_subscriptions').insert({ user_id: u, ...s, user_agent: navigator.userAgent.slice(0, 200) }))
+}
+export async function deletePushSubscription(endpoint: string) {
+  ok(await supabase.from('push_subscriptions').delete().eq('endpoint', endpoint))
+}
+export const getPushSubscriptions = async () =>
+  ok(await supabase.from('push_subscriptions').select('id,endpoint,user_agent,created_at')) as { id: string; endpoint: string; user_agent: string | null; created_at: string }[]
+
 // ---- conta ----
 export async function deleteAccount() {
   ok(await supabase.rpc('delete_my_account'))

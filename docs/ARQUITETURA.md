@@ -29,4 +29,5 @@ Navegador (GitHub Pages, estático)
 - `review_events` e `review_reschedule_log`: imutáveis (sem UPDATE/DELETE; trigger bloqueia UPDATE).
 - `questions` **não tem coluna de gabarito** (teste automatizado garante). O gabarito oficial vive em `answer_keys` (RLS sem políticas, `REVOKE` para `anon/authenticated`): só os RPCs `reveal_answer` (exige tentativa avulsa do próprio usuário), `finalize_simulation` e `simulation_review` (só após finalizar, só do dono) o expõem; o gatilho `apply_answer_key` grava `is_correct`/`key_status` no servidor e ignora valores enviados pelo cliente.
 - Privilégio elevado só em `delete_my_account()` (`SECURITY DEFINER`, `search_path` fixo, executa apenas para `authenticated`, apaga somente `auth.uid()`).
+- Lembretes: `push_subscriptions` (RLS do dono; sem UPDATE) e `reminder_bots` (só hash; sem políticas). O remetente chama `reminders_due/mark_sent/prune`, que exigem o token e só devolvem dados de quem ligou o lembrete.
 - Nenhum `admin` por flag local ou `VITE_*`: tabela `admins` sem política e sem rota de admin no front.
