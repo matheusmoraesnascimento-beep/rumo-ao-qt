@@ -6,9 +6,9 @@ Ferramenta independente de estudos. Não oficial e sem vínculo com a Marinha do
 - **Front-end:** React 19 + TypeScript + Vite + Tailwind, `HashRouter`, TanStack Query, React Hook Form + Zod, Recharts.
 - **Back-end:** Supabase (Auth, Postgres com RLS, Storage privado). Sem servidor próprio.
 - **Hospedagem:** GitHub Pages, publicado por GitHub Actions.
-- **Gabaritos:** não existem em nenhum arquivo, tabela ou imagem. Respostas são registradas e **autoavaliadas** (autodeclaradas).
+- **Gabaritos oficiais** (SSPM, Informática, **cor do seu caderno**): ficam numa tabela que o navegador não consegue ler e só são revelados pelo servidor **depois que você responde** (ou ao finalizar um simulado). Questões **anuladas** continuam no banco, com a marcação **ANULADA**, e não contam como acerto nem erro.
 
-> `21/50` (2026) é só a **linha de base histórica declarada**. A pontuação "verificada" é sempre **N/A** até existir gabarito oficial importado por processo separado.
+> `21/50` (2026) é só a **linha de base histórica declarada**. A pontuação por gabarito é a conferência com o gabarito final publicado pela banca, **não a nota oficial do concurso**. Cores: 2022–2025 **Amarela**, 2026 **Rosa** (confirmadas na capa/rodapé de cada prova).
 
 ## O que está implementado
 
@@ -50,8 +50,10 @@ Sem `.env.local` o app abre na tela "Configuração pendente" (não quebra).
    2. `supabase/migrations/20261023000002_rls_rpc.sql`
    3. `supabase/migrations/20261023000003_storage.sql`
    3b. `supabase/migrations/20261024000004_storage_admin_upload.sql` (permite que administradores enviem recortes sem usar a service_role)
+   3c. `supabase/migrations/20261024000005_answer_keys.sql` (gabaritos oficiais, RPCs de conferência e marcação de anuladas)
    4. `supabase/seed.sql` (provas, edital provisório, temas de redação)
    5. `supabase/seed_questoes.sql` (250 questões; gerado localmente, **não vai ao Git** — veja "Provas e direitos")
+   6. `supabase/seed_gabaritos.sql` (gerado com `npm run gabaritos:extrair` e `npm run gabaritos:seed` a partir dos PDFs oficiais; **não vai ao Git** — veja `docs/IMPORTACAO_QUESTOES.md`)
 
    Alternativa com a CLI: `supabase link --project-ref SEU_REF` e `supabase db push`; depois `psql "$DATABASE_URL" -f supabase/seed.sql -f supabase/seed_questoes.sql`.
 4. **Authentication → Providers → Email**: habilitado. Recomendado manter "Confirm email" ligado.

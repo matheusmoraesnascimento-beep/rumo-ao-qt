@@ -3,7 +3,7 @@ import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAx
 import { Card, Empty, ErrorBox, PageTitle, Spinner, Stat } from '@/components/ui'
 import { useStudyData } from '@/features/dashboard/usePlan'
 import { useExams, useSimulations, useAllFeedback } from '@/lib/queries'
-import { fmtPct, selfRate, verifiedRate } from '@/lib/metrics'
+import { effectiveRate, fmtPct, selfRate, verifiedRate } from '@/lib/metrics'
 import { formatInTimeZone } from 'date-fns-tz'
 import { DEFAULT_TZ } from '@/lib/srs'
 
@@ -31,7 +31,7 @@ export default function Analise() {
       const o = qOcr.get(a.question_id); if (o) byOcr.set(o, [...(byOcr.get(o) ?? []), a])
       for (const t of topicsOf.get(a.question_id) ?? []) byTopic.set(t, [...(byTopic.get(t) ?? []), a])
     }
-    const rate = (x: typeof d.attempts) => { const r = selfRate(x); return r === null ? null : Math.round(r * 100) }
+    const rate = (x: typeof d.attempts) => { const r = effectiveRate(x); return r === null ? null : Math.round(r * 100) }
     const yearRows = [2022, 2023, 2024, 2025, 2026].map((y) => ({ ano: String(y), autodeclarado: rate(byYear.get(y) ?? []), feitas: byYear.get(y)?.length ?? 0 }))
     const topicRows = [...byTopic].map(([t, a]) => ({ topico: d.topics.find((x) => x.id === t)?.name ?? '?', autodeclarado: rate(a), feitas: a.length })).sort((a, b) => (a.autodeclarado ?? 101) - (b.autodeclarado ?? 101)).slice(0, 12)
     // tempo investido x progresso por macroárea
@@ -75,10 +75,10 @@ export default function Analise() {
 
   return (
     <div className="space-y-4">
-      <PageTitle title="Painel de análise" sub="Dados descritivos do seu uso — não preveem a prova. Taxas são autodeclaradas; verificada: N/A (sem gabarito)." />
+      <PageTitle title="Painel de análise" sub="Dados descritivos do seu uso — não preveem a prova. Taxas usam o gabarito oficial quando a questão tem; anuladas ficam fora." />
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
         <Stat label="Questões feitas" value={d.attempts.length} sub={`${done250} distintas de ${d.questions.length}`} />
-        <Stat label="Taxa autodeclarada" value={fmtPct(selfRate(d.attempts))} sub={`Verificada: ${fmtPct(verifiedRate(d.attempts))}`} />
+        <Stat label="Taxa de acerto" value={fmtPct(effectiveRate(d.attempts))} sub={`Gabarito oficial: ${fmtPct(verifiedRate(d.attempts))} · autodeclarada: ${fmtPct(selfRate(d.attempts))}`} />
         <Stat label="Simulados" value={doneSims} />
         <Stat label="Redações" value={new Set(d.subs.map((s) => s.essay_id)).size} />
         <Stat label="Revisões cumpridas" value={reviewed + cardsWeek} />

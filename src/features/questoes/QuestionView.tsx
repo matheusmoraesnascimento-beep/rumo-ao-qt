@@ -27,9 +27,12 @@ export function QuestionView({ q, exam }: { q: Question; exam?: number }) {
         {exam && <Badge>{exam}</Badge>}
         <Badge tone={q.ocr_status === 'reviewed' ? 'ok' : 'warn'}>{OCR_LABEL[q.ocr_status]}</Badge>
         {q.has_figure && <Badge tone="sea">contém figura/código</Badge>}
-        <Badge>Gabarito não incluído</Badge>
+        {q.annulled ? <Badge tone="bad">ANULADA pela banca</Badge> : <Badge>Gabarito após responder</Badge>}
         {q.source_page && <span className="text-muted">{q.source_pdf}, p. {q.source_page}{q.source_column ? `, coluna ${q.source_column === 'left' ? 'esq.' : 'dir.'}` : ''}</span>}
       </div>
+      {q.annulled && (
+        <p role="note" className="flex items-start gap-2 rounded-lg border border-bad/40 bg-bad/10 p-2 text-sm"><AlertTriangle className="mt-0.5 size-4 shrink-0" aria-hidden />Esta questão foi <strong>anulada</strong> pela banca (gabarito final). Pode ser estudada, mas não conta como acerto nem como erro.</p>
+      )}
       <div className="flex gap-2">
         <Button size="sm" variant={mode === 'imagem' ? 'primary' : 'secondary'} onClick={() => setMode('imagem')}><FileImage className="size-4" /> Imagem original</Button>
         <Button size="sm" variant={mode === 'texto' ? 'primary' : 'secondary'} onClick={() => setMode('texto')} disabled={!q.ocr_body}>Texto (OCR)</Button>
@@ -37,7 +40,7 @@ export function QuestionView({ q, exam }: { q: Question; exam?: number }) {
       {mode === 'imagem' ? (
         url.isLoading ? <Spinner label="Carregando recorte…" /> :
         url.data ? (
-          <img src={url.data} alt={`Recorte original da questão ${q.number}${exam ? ` de ${exam}` : ''}. Gabarito não incluído.`} className="max-h-[75vh] w-full rounded-lg border border-line bg-white object-contain" />
+          <img src={url.data} alt={`Recorte original da questão ${q.number}${exam ? ` de ${exam}` : ''}.${q.annulled ? ' Questão anulada pela banca.' : ''}`} className="max-h-[75vh] w-full rounded-lg border border-line bg-white object-contain" />
         ) : (
           <div role="alert" className="rounded-lg border border-warn/40 bg-warn/10 p-3 text-sm">
             Recorte indisponível ({url.error instanceof Error ? url.error.message : 'sem imagem enviada ao bucket privado'}). Use o texto OCR com cautela ou consulte a página-fonte no PDF original.

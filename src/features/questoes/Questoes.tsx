@@ -22,6 +22,7 @@ export default function Questoes() {
     status: (params.get('status') as QFilters['status']) ?? (modo === 'ineditas' ? 'inedita' : modo === 'erros' ? 'errei' : 'todas'),
     favorite: params.get('fav') === '1',
     figure: params.get('fig') === '1',
+    annulled: params.get('anul') === '1',
   }
   const textRes = useQuery({ queryKey: ['qtext', submitted], queryFn: () => searchQuestionText(submitted), enabled: submitted.length >= 3 })
 
@@ -63,7 +64,7 @@ export default function Questoes() {
 
   return (
     <div className="space-y-4">
-      <PageTitle title="Banco de questões 2022–2026" sub={`${list.length} de ${qs.data?.length ?? 0} · gabarito não incluído; a resposta é sua autoavaliação`} />
+      <PageTitle title="Banco de questões 2022–2026" sub={`${list.length} de ${qs.data?.length ?? 0} · gabarito oficial liberado após você responder; anuladas marcadas`} />
       <Card className="space-y-3">
         <div className="flex flex-wrap gap-2">
           <Button size="sm" variant="secondary" onClick={() => setParams({ modo: 'ineditas' })}>Inéditas para mim</Button>
@@ -83,6 +84,7 @@ export default function Questoes() {
           <Field label="Palavra-chave (OCR)"><form onSubmit={(e) => { e.preventDefault(); setSubmitted(text.trim()) }}><Input value={text} onChange={(e) => { setText(e.target.value); if (!e.target.value) setSubmitted('') }} placeholder="Enter para buscar" /></form></Field>
           <label className="flex items-end gap-2 pb-2 text-sm"><input type="checkbox" checked={f.favorite} onChange={(e) => set('fav', e.target.checked ? '1' : '')} /> Favoritas</label>
           <label className="flex items-end gap-2 pb-2 text-sm"><input type="checkbox" checked={f.figure} onChange={(e) => set('fig', e.target.checked ? '1' : '')} /> Com figura/código</label>
+          <label className="flex items-end gap-2 pb-2 text-sm"><input type="checkbox" checked={f.annulled} onChange={(e) => set('anul', e.target.checked ? '1' : '')} /> Só anuladas</label>
         </div>
       </Card>
       {!list.length ? <Empty>Nenhuma questão com esses filtros.</Empty> : (
@@ -97,6 +99,7 @@ export default function Questoes() {
                   {!tried.has(q.id) ? <Badge>inédita</Badge> : g === 'acertei' ? <Badge tone="ok">acertei</Badge> : g === 'errei' ? <Badge tone="bad">errei</Badge> : <Badge tone="sea">feita</Badge>}
                   {q.ocr_status !== 'reviewed' && <Badge tone="warn">OCR</Badge>}
                   {q.has_figure && <Badge tone="sea">fig</Badge>}
+                  {q.annulled && <Badge tone="bad">ANULADA</Badge>}
                 </div>
               </Link>
             )

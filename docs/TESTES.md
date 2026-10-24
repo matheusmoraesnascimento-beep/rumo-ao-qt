@@ -8,7 +8,7 @@
 | Importação + seed | `tests/importacao.test.ts` | 5×50, Q01–Q50, sem gabarito, imagens, seed idempotente, não sobrescreve `reviewed` (pulado sem `dados/`) |
 | Lógica | `tests/lib.test.ts` | SRS (0–5, lapso, 30 dias, semana sem abrir, fuso), planejador, simulado (50, ordem, semente), métricas (verificada N/A) |
 | Filtros/backup | `tests/filtros-backup.test.ts` | filtros, mistura, CSV, restauração |
-| UI | `tests/ui.test.tsx` | imagem por padrão, "Gabarito não incluído", 21/50 só como base, retomada de simulado, revisão antes de finalizar |
+| UI | `tests/ui.test.tsx`, `tests/gabarito-ui.test.tsx` | imagem por padrão, 21/50 só como base, retomada de simulado, revisão antes de finalizar, gabarito só após responder, marcação ANULADA, conferência do simulado |
 | Auth | `tests/auth.test.tsx` | cadastro, login, validação, logout/sessão, recuperação de senha |
 | Redação | `tests/redacao.test.tsx` | autosave, versões, rótulos não oficiais |
 | E2E | `tests/e2e/smoke.spec.ts` | build em `/rumo-ao-qt/`, deep link/refresh, mobile sem scroll horizontal, provas não servidas pelo Pages |

@@ -19,9 +19,10 @@ export interface Question {
   ocr_body: string | null; options: { letter: string; text: string }[]
   image_path: string | null; image_status: string | null
   ocr_status: OcrStatus; has_figure: boolean | null; reviewed_at: string | null
+  annulled: boolean; annulled_note: string | null
 }
 export interface QuestionLite {
-  id: string; code: string; exam_id: string; number: number; ocr_status: OcrStatus; has_figure: boolean | null
+  id: string; code: string; exam_id: string; number: number; ocr_status: OcrStatus; has_figure: boolean | null; annulled: boolean
 }
 export interface Settings {
   user_id: string; goal_correct: number; baseline_2026: number; exam_date: string | null
@@ -42,6 +43,7 @@ export interface Attempt {
   id: string; user_id: string; question_id: string; simulation_id: string | null
   selected_option: string | null; time_seconds: number; confidence: number | null
   self_grade: SelfGrade | null; created_at: string
+  key_status: 'valida' | 'anulada' | 'alterada' | null; is_correct: boolean | null
 }
 export interface Simulation {
   id: string; user_id: string; mode: 'year' | 'mixed'; exam_id: string | null; seed: string | null

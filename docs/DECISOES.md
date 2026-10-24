@@ -11,7 +11,7 @@
 | Rating 5 | +2 níveis só com ≥ 2 revisões prévias; rating 3 mantém nível; 0–2 → nível 0 | Regras da especificação |
 | Plano diário | Score explicável 0,35/0,25/0,20/0,10/0,10; "ajuste pessoal" = (5 − confiança)/5 | Pesos pedagógicos iniciais, não estatística da banca |
 | Dificuldade por tópico | Só de questões **classificadas pelo usuário**; sem classificação = 0 | Não fabricar estatística |
-| Pontuação | Autodeclarada rotulada; verificada = **N/A** | Sem gabarito |
+| Pontuação | Gabarito oficial (SSPM) aplicado no servidor; autoavaliação continua opcional; anuladas marcadas e fora da conta | Nota efetiva = gabarito oficial > autoavaliação; não é a nota oficial do concurso |
 | Redação | Temas autorais navais/nacionais (`official=false`); rubrica pedagógica editável | Sem nota oficial inventada |
 | Editor OCR `/admin` | Não publicado | Exigiria papel de admin verificado no servidor; revisão por SQL/CLI |
 | shadcn/ui | Componentes próprios em Tailwind (`src/components/ui.tsx`) no estilo shadcn | Menos dependências; podem ser trocados |

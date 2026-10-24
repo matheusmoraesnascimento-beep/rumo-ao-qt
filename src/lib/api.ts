@@ -21,7 +21,7 @@ export const getExams = async () => ok(await supabase.from('exams').select('*').
 export const getTopics = async () =>
   ok(await supabase.from('topics').select('*').order('ordinal')) as Topic[]
 export const getQuestionsLite = async () =>
-  ok(await supabase.from('questions').select('id,code,exam_id,number,ocr_status,has_figure').order('code').limit(1000)) as QuestionLite[]
+  ok(await supabase.from('questions').select('id,code,exam_id,number,ocr_status,has_figure,annulled').order('code').limit(1000)) as QuestionLite[]
 export const getQuestion = async (id: string) =>
   ok(await supabase.from('questions').select('*').eq('id', id).single()) as Question
 export const getQuestionsByIds = async (ids: string[]) =>
@@ -124,6 +124,20 @@ export async function createSimulation(s: {
 export async function patchSimulation(id: string, patch: Partial<Pick<Simulation, 'marked' | 'elapsed_seconds' | 'status' | 'finished_at' | 'duration_seconds'>>) {
   ok(await supabase.from('simulations').update(patch).eq('id', id))
 }
+
+/** Gabarito oficial de UMA questão: liberado pelo servidor só depois que você respondeu (fora de simulado). */
+export interface RevealedKey { correct_option: string | null; status: 'valida' | 'anulada' | 'alterada'; note: string | null }
+export async function revealAnswer(questionId: string): Promise<RevealedKey> {
+  const rows = ok(await supabase.rpc('reveal_answer', { p_question_id: questionId })) as RevealedKey[]
+  if (!rows?.length) throw new Error('Gabarito indisponível para esta questão.')
+  return rows[0]
+}
+/** Finaliza o simulado no servidor e libera a conferência. */
+export async function finalizeSimulation(id: string, elapsedSeconds: number) {
+  return ok(await supabase.rpc('finalize_simulation', { p_sim_id: id, p_elapsed_seconds: Math.max(0, Math.round(elapsedSeconds)) })) as Simulation
+}
+export interface ReviewKey extends RevealedKey { question_id: string }
+export const simulationReview = async (id: string) => ok(await supabase.rpc('simulation_review', { p_sim_id: id })) as ReviewKey[]
 
 // ---- revisões ----
 export const getCards = async () =>

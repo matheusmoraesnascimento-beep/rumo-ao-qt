@@ -22,7 +22,7 @@ export async function createDb() {
     alter default privileges in schema public grant all on tables to anon, authenticated;
     alter default privileges in schema public grant all on sequences to anon, authenticated;
   `)
-  for (const f of ['20261023000001_schema.sql', '20261023000002_rls_rpc.sql']) {
+  for (const f of ['20261023000001_schema.sql', '20261023000002_rls_rpc.sql', '20261024000005_answer_keys.sql']) {
     await db.exec(readFileSync(path.join(MIG, f), 'utf8'))
   }
   return db

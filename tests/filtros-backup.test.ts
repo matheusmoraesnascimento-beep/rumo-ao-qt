@@ -5,9 +5,9 @@ import { sanitizeRows, toCsv, validateBackup } from '@/lib/backup'
 import type { Attempt, QuestionLite } from '@/types/db'
 
 const qs: QuestionLite[] = Array.from({ length: 100 }, (_, i) => ({
-  id: `q${i}`, code: `c${i}`, exam_id: i < 50 ? 'e25' : 'e26', number: (i % 50) + 1, ocr_status: i % 10 === 0 ? 'reviewed' : 'pending_review', has_figure: i % 7 === 0,
+  id: `q${i}`, code: `c${i}`, exam_id: i < 50 ? 'e25' : 'e26', number: (i % 50) + 1, ocr_status: i % 10 === 0 ? 'reviewed' : 'pending_review', has_figure: i % 7 === 0, annulled: i === 99,
 }))
-const att = (q: string, g: Attempt['self_grade'], t: string): Attempt => ({ id: q + t, user_id: 'u', question_id: q, simulation_id: null, selected_option: 'A', time_seconds: 5, confidence: 3, self_grade: g, created_at: t })
+const att = (q: string, g: Attempt['self_grade'], t: string): Attempt => ({ id: q + t, user_id: 'u', question_id: q, simulation_id: null, selected_option: 'A', time_seconds: 5, confidence: 3, self_grade: g, created_at: t, key_status: null, is_correct: null })
 const ctx: QCtx = {
   yearOf: new Map([['e25', 2025], ['e26', 2026]]),
   attempts: [att('q1', 'errei', '2025-01-01'), att('q1', 'acertei', '2025-02-01'), att('q2', 'errei', '2025-01-01')],

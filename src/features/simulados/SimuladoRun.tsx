@@ -3,7 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Flag } from 'lucide-react'
 import { Badge, Button, Card, ErrorBox, Spinner } from '@/components/ui'
-import { getQuestionsByIds, getSimAttempts, getSimulation, patchSimulation, upsertSimAttempt } from '@/lib/api'
+import { finalizeSimulation, getQuestionsByIds, getSimAttempts, getSimulation, patchSimulation, simulationReview, upsertSimAttempt } from '@/lib/api'
 import { qk, useExams } from '@/lib/queries'
 import { summarizeSimulation } from '@/lib/simulado'
 import { errMsg } from '@/lib/utils'
@@ -20,6 +20,8 @@ export default function SimuladoRun() {
   const sim = useQuery({ queryKey: ['sim', id], queryFn: () => getSimulation(id) })
   const questions = useQuery({ queryKey: ['sim-q', id], enabled: !!sim.data, queryFn: () => getQuestionsByIds(sim.data!.question_ids), staleTime: Infinity })
   const attempts = useQuery({ queryKey: ['sim-a', id], queryFn: () => getSimAttempts(id) })
+  // Conferência com o gabarito oficial: o servidor só entrega depois de finalizado.
+  const review = useQuery({ queryKey: ['sim-review', id], enabled: sim.data?.status === 'finalizado', queryFn: () => simulationReview(id) })
 
   const [ans, setAns] = useState<Record<string, AnswerState>>({})
   const [marked, setMarked] = useState<Set<string>>(new Set())
@@ -92,13 +94,18 @@ export default function SimuladoRun() {
   const goto = (i: number) => { setCur(i); qStart.current = Date.now() }
   async function finish() {
     try {
-      await patchSimulation(id, { status: 'finalizado', finished_at: new Date().toISOString(), duration_seconds: elapsed, elapsed_seconds: elapsed })
-      await Promise.all([qc.invalidateQueries({ queryKey: ['sim', id] }), qc.invalidateQueries({ queryKey: qk.sims }), qc.invalidateQueries({ queryKey: qk.attempts })])
+      await finalizeSimulation(id, elapsed) // servidor: encerra e aplica o gabarito oficial às suas respostas
+      await Promise.all([qc.invalidateQueries({ queryKey: ['sim', id] }), qc.invalidateQueries({ queryKey: ['sim-a', id] }), qc.invalidateQueries({ queryKey: ['sim-review', id] }), qc.invalidateQueries({ queryKey: qk.sims }), qc.invalidateQueries({ queryKey: qk.attempts })])
     } catch (e) { setMsg({ ok: false, t: errMsg(e) }) }
   }
 
   if (finished) {
-    const r = summarizeSimulation(s.question_ids, ordered.map((o) => ({ questionId: o.id, selected: ans[o.id]?.selected, selfGrade: ans[o.id]?.selfGrade as SelfGrade | null })))
+    const att = new Map((attempts.data ?? []).map((a) => [a.question_id, a]))
+    const keys = new Map((review.data ?? []).map((k) => [k.question_id, k]))
+    const r = summarizeSimulation(s.question_ids, ordered.map((o) => ({
+      questionId: o.id, selected: ans[o.id]?.selected, selfGrade: ans[o.id]?.selfGrade as SelfGrade | null,
+      isCorrect: att.get(o.id)?.is_correct ?? null, keyStatus: att.get(o.id)?.key_status ?? (o.annulled ? 'anulada' : null),
+    })))
     return (
       <div className="space-y-4">
         <Link to="/simulados" className="text-sm text-sea underline">← Simulados</Link>
@@ -108,9 +115,27 @@ export default function SimuladoRun() {
             <div><dt className="text-xs text-muted">Respondidas</dt><dd className="text-2xl font-semibold">{r.answered}/50</dd></div>
             <div><dt className="text-xs text-muted">Em branco</dt><dd className="text-2xl font-semibold">{r.unanswered}</dd></div>
             <div><dt className="text-xs text-muted">Autodeclarado</dt><dd className="text-2xl font-semibold">{r.selfScore === null ? '—' : `${r.selfCorrect}/${r.selfCorrect + r.selfWrong}`}</dd><dd className="text-xs text-muted">acertei/avaliadas ({r.selfDeclared} avaliadas)</dd></div>
-            <div><dt className="text-xs text-muted">Pontuação verificada</dt><dd className="text-2xl font-semibold">N/A</dd><dd className="text-xs text-muted">sem gabarito validado</dd></div>
+            <div><dt className="text-xs text-muted">Acertos (gabarito oficial)</dt><dd className="text-2xl font-semibold">{r.verifiedScore === null ? 'N/A' : `${r.verifiedScore}/${r.verifiedOutOf}`}</dd><dd className="text-xs text-muted">{r.annulled ? `${r.annulled} anulada(s) fora da conta` : 'questões válidas'}</dd></div>
           </dl>
-          <p className="text-sm text-muted">Não é nota oficial. Tempo: {hhmmss(s.duration_seconds ?? s.elapsed_seconds)}.</p>
+          <p className="text-sm text-muted">Conferência com o gabarito final publicado pela banca; não é a nota oficial do concurso (regras de pontuação e redação dependem do edital). Tempo: {hhmmss(s.duration_seconds ?? s.elapsed_seconds)}.</p>
+        </Card>
+        <Card className="space-y-2">
+          <h2 className="font-semibold">Conferência questão a questão</h2>
+          {review.isLoading ? <Spinner label="Carregando gabarito…" /> : review.error ? <ErrorBox error={review.error} retry={() => review.refetch()} /> : (
+            <ul className="grid grid-cols-1 gap-1 sm:grid-cols-2 lg:grid-cols-3" aria-label="Conferência do simulado">
+              {ordered.map((o, i) => {
+                const k = keys.get(o.id), a = att.get(o.id)
+                const anul = k?.status === 'anulada' || o.annulled
+                return (
+                  <li key={o.id} className="flex items-center justify-between gap-2 rounded-lg border border-line px-2 py-1 text-sm">
+                    <span className="font-medium">Q{String(i + 1).padStart(2, '0')}</span>
+                    <span className="text-muted">você: {ans[o.id]?.selected ?? '—'} · gab.: {anul ? '—' : (k?.correct_option ?? '?')}</span>
+                    {anul ? <Badge tone="bad">ANULADA</Badge> : a?.is_correct === true ? <Badge tone="ok">certa</Badge> : a?.is_correct === false ? <Badge tone="bad">errada</Badge> : <Badge>em branco</Badge>}
+                  </li>
+                )
+              })}
+            </ul>
+          )}
         </Card>
       </div>
     )
@@ -125,7 +150,7 @@ export default function SimuladoRun() {
           <p>Respondidas: <strong>{answeredIds.length}/50</strong> · Em branco: <strong>{blank.length}</strong> · Marcadas para revisar: <strong>{marked.size}</strong></p>
           <div className="grid grid-cols-5 gap-2 sm:grid-cols-10">
             {ordered.map((o, i) => (
-              <button key={o.id} onClick={() => { goto(i); setPhase('run') }} className={`rounded-lg border p-2 text-sm ${ans[o.id]?.selected ? 'border-sea bg-sea/15' : 'border-line'} ${marked.has(o.id) ? 'ring-2 ring-warn' : ''}`} aria-label={`Questão ${i + 1}${ans[o.id]?.selected ? ' respondida' : ' em branco'}${marked.has(o.id) ? ', marcada' : ''}`}>{i + 1}</button>
+              <button key={o.id} onClick={() => { goto(i); setPhase('run') }} className={`rounded-lg border p-2 text-sm ${ans[o.id]?.selected ? 'border-sea bg-sea/15' : 'border-line'} ${marked.has(o.id) ? 'ring-2 ring-warn' : ''}`} aria-label={`Questão ${i + 1}${ans[o.id]?.selected ? ' respondida' : ' em branco'}${marked.has(o.id) ? ', marcada' : ''}${o.annulled ? ', anulada' : ''}`}>{i + 1}{o.annulled ? '*' : ''}</button>
             ))}
           </div>
           <div className="flex gap-2">
@@ -160,7 +185,7 @@ export default function SimuladoRun() {
       <Card className="p-2">
         <div className="grid grid-cols-10 gap-1">
           {ordered.map((o, i) => (
-            <button key={o.id} onClick={() => goto(i)} aria-label={`Ir para questão ${i + 1}`} aria-current={i === cur} className={`rounded p-1 text-xs ${i === cur ? 'bg-navy text-white dark:bg-sea dark:text-[#06101f]' : ans[o.id]?.selected ? 'bg-sea/25' : 'bg-line/50'} ${marked.has(o.id) ? 'ring-2 ring-warn' : ''}`}>{i + 1}</button>
+            <button key={o.id} onClick={() => goto(i)} aria-label={`Ir para questão ${i + 1}${o.annulled ? ' (anulada)' : ''}`} title={o.annulled ? 'Questão anulada pela banca' : undefined} aria-current={i === cur} className={`rounded p-1 text-xs ${o.annulled ? 'underline decoration-bad decoration-2 ' : ''}${i === cur ? 'bg-navy text-white dark:bg-sea dark:text-[#06101f]' : ans[o.id]?.selected ? 'bg-sea/25' : 'bg-line/50'} ${marked.has(o.id) ? 'ring-2 ring-warn' : ''}`}>{i + 1}</button>
           ))}
         </div>
       </Card>

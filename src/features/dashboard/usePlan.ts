@@ -7,7 +7,7 @@ import {
 import { isWritingDue, planDay, rankTopics, type PlanBlock, type Scored, type TopicSignal } from '@/lib/planner'
 import { dailyQueue } from '@/lib/srs'
 import { todayLocal, weekdayKey } from '@/lib/utils'
-import { coverage } from '@/lib/metrics'
+import { coverage, effectiveGrade } from '@/lib/metrics'
 
 export function useStudyData() {
   const settings = useSettings(), topics = useTopics(), progress = useProgress(), cards = useCards()
@@ -39,9 +39,10 @@ export function useDerived(d: StudyData, minutesOverride?: number) {
     for (const a of d.attempts) {
       for (const t of qTopic.get(a.question_id) ?? []) {
         const s = stat.get(t) ?? { attempts: 0, errors: 0 }
-        if (a.self_grade === 'acertei' || a.self_grade === 'errei') {
+        const g = effectiveGrade(a) // gabarito oficial prevalece; anulada não conta
+        if (g === 'acertei' || g === 'errei') {
           s.attempts++
-          if (a.self_grade === 'errei') s.errors++
+          if (g === 'errei') s.errors++
         }
         stat.set(t, s)
       }

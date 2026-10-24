@@ -1,5 +1,6 @@
 import type { Attempt, QuestionLite } from '@/types/db'
 import { rng, shuffle } from './simulado'
+import { effectiveGrade } from './metrics'
 
 export interface QFilters {
   year?: number
@@ -9,6 +10,7 @@ export interface QFilters {
   status?: 'todas' | 'inedita' | 'resolvida' | 'errei' | 'acertei'
   favorite?: boolean
   figure?: boolean
+  annulled?: boolean
   textIds?: Set<string> | null // resultado da busca full-text (null = sem busca)
 }
 
@@ -23,10 +25,11 @@ export interface QCtx {
 export function lastGrades(attempts: Attempt[]): Map<string, Attempt['self_grade']> {
   const m = new Map<string, { t: number; g: Attempt['self_grade'] }>()
   for (const a of attempts) {
-    if (!a.self_grade) continue
+    const g = effectiveGrade(a) // gabarito oficial prevalece; anulada não conta
+    if (!g) continue
     const t = new Date(a.created_at).getTime()
     const p = m.get(a.question_id)
-    if (!p || t > p.t) m.set(a.question_id, { t, g: a.self_grade })
+    if (!p || t > p.t) m.set(a.question_id, { t, g })
   }
   return new Map([...m].map(([k, v]) => [k, v.g]))
 }
@@ -41,6 +44,7 @@ export function filterQuestions(qs: QuestionLite[], f: QFilters, c: QCtx): Quest
     if (f.ocr && q.ocr_status !== f.ocr) return false
     if (f.favorite && !c.favorites.has(q.id)) return false
     if (f.figure && !q.has_figure) return false
+    if (f.annulled && !q.annulled) return false
     if (f.textIds && !f.textIds.has(q.id)) return false
     switch (f.status) {
       case 'inedita': return !tried.has(q.id)

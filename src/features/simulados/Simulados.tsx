@@ -44,7 +44,7 @@ export default function Simulados() {
 
   return (
     <div className="space-y-4">
-      <PageTitle title="Simulados" sub="50 questões · sem gabarito: o resultado é autodeclarado" />
+      <PageTitle title="Simulados" sub="50 questões · conferência com o gabarito oficial ao finalizar; anuladas marcadas e fora da conta" />
       <Card className="space-y-3">
         <h2 className="font-semibold">Novo simulado</h2>
         <div className="grid gap-3 sm:grid-cols-4">

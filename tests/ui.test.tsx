@@ -37,14 +37,15 @@ const wrap = (ui: ReactNode, route = '/') => {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   return render(<QueryClientProvider client={qc}><MemoryRouter initialEntries={[route]}>{ui}</MemoryRouter></QueryClientProvider>)
 }
-const Q: Question = { id: 'q1', code: 'CPT-2026-Q01', exam_id: 'e26', number: 1, source_pdf: 'p.pdf', source_page: 2, source_column: 'left', ocr_body: 'Enunciado OCR', options: [], image_path: 'q1.webp', image_status: null, ocr_status: 'pending_review', has_figure: true, reviewed_at: null }
+const Q: Question = { id: 'q1', code: 'CPT-2026-Q01', exam_id: 'e26', number: 1, source_pdf: 'p.pdf', source_page: 2, source_column: 'left', ocr_body: 'Enunciado OCR', options: [], image_path: 'q1.webp', image_status: null, ocr_status: 'pending_review', has_figure: true, reviewed_at: null, annulled: false, annulled_note: null }
 
 beforeEach(() => cleanup())
 
-describe('questão: fidelidade e ausência de gabarito', () => {
-  it('mostra imagem original por padrão e rótulo "Gabarito não incluído"', async () => {
+describe('questão: fidelidade e gabarito só após responder', () => {
+  it('mostra imagem original por padrão e avisa que o gabarito vem após responder', async () => {
     wrap(<QuestionView q={Q} exam={2026} />)
-    expect(screen.getByText('Gabarito não incluído')).toBeInTheDocument()
+    expect(screen.getByText('Gabarito após responder')).toBeInTheDocument()
+    expect(screen.queryByText(/ANULADA/)).not.toBeInTheDocument()
     expect(screen.getByText('OCR não revisado')).toBeInTheDocument()
     const img = await screen.findByRole('img')
     expect(img).toHaveAttribute('src', 'https://example.test/img.webp')

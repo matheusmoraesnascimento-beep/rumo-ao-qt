@@ -67,19 +67,24 @@ export interface SimAnswer {
   questionId: string
   selected?: string | null
   selfGrade?: 'acertei' | 'errei' | 'nao_sei' | null
+  isCorrect?: boolean | null // preenchido pelo servidor SOMENTE após finalizar
+  keyStatus?: 'valida' | 'anulada' | 'alterada' | null
 }
 
-/** Resultado honesto: sem gabarito => nota verificada indisponível. */
-export function summarizeSimulation(ids: string[], answers: SimAnswer[], verifiedKey?: Record<string, string>) {
+/**
+ * Resumo do simulado. A pontuação verificada vem do gabarito oficial aplicado pelo servidor na finalização;
+ * questões ANULADAS não contam como acerto nem erro (ficam fora do total válido). Não é a nota oficial do concurso.
+ */
+export function summarizeSimulation(ids: string[], answers: SimAnswer[]) {
   const byQ = new Map(answers.map((a) => [a.questionId, a]))
   const answered = ids.filter((id) => byQ.get(id)?.selected).length
   const selfDeclared = ids.filter((id) => byQ.get(id)?.selfGrade).length
   const selfCorrect = ids.filter((id) => byQ.get(id)?.selfGrade === 'acertei').length
   const selfWrong = ids.filter((id) => byQ.get(id)?.selfGrade === 'errei').length
-  let verified: number | null = null
-  if (verifiedKey && Object.keys(verifiedKey).length) {
-    verified = ids.filter((id) => verifiedKey[id] && verifiedKey[id] === byQ.get(id)?.selected).length
-  }
+  const hasKey = ids.some((id) => byQ.get(id)?.keyStatus)
+  const annulled = ids.filter((id) => byQ.get(id)?.keyStatus === 'anulada').length
+  const correct = ids.filter((id) => byQ.get(id)?.isCorrect === true).length
+  const wrong = ids.filter((id) => byQ.get(id)?.isCorrect === false).length
   return {
     total: ids.length,
     answered,
@@ -88,8 +93,11 @@ export function summarizeSimulation(ids: string[], answers: SimAnswer[], verifie
     selfCorrect,
     selfWrong,
     selfScore: selfCorrect + selfWrong > 0 ? selfCorrect : null,
-    verifiedScore: verified, // null => "N/A (sem gabarito validado)"
+    verified: hasKey,
+    verifiedScore: hasKey ? correct : null, // null => N/A
+    verifiedWrong: hasKey ? wrong : null,
+    annulled: hasKey ? annulled : null,
+    verifiedOutOf: hasKey ? ids.length - annulled : null,
   }
 }
-
 export const GOALS = [30, 35, 40] as const

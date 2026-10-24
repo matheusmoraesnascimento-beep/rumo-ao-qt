@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Star } from 'lucide-react'
 import { Badge, Button, Card, ErrorBox, Field, Input, Select, Spinner, Textarea } from '@/components/ui'
-import { addAttempt, createCard, getQuestion, reportQuestion, setFlag, setUserQuestionTopic } from '@/lib/api'
+import { addAttempt, createCard, getQuestion, reportQuestion, revealAnswer, setFlag, setUserQuestionTopic, type RevealedKey } from '@/lib/api'
 import { qk, useExams, useFlags, useTopics, useUserQuestionTopics } from '@/lib/queries'
 import { firstDueAt } from '@/lib/srs'
 import { errMsg } from '@/lib/utils'
@@ -22,10 +22,11 @@ export default function QuestaoPage() {
   const [msg, setMsg] = useState<{ ok: boolean; t: string } | null>(null)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
+  const [result, setResult] = useState<{ key: RevealedKey; isCorrect: boolean | null } | null>(null)
   const t0 = useRef(Date.now())
   const [report, setReport] = useState('')
 
-  useEffect(() => { t0.current = Date.now(); setAns({ selected: null, selfGrade: null, confidence: null }); setSaved(false); setMsg(null) }, [id])
+  useEffect(() => { t0.current = Date.now(); setAns({ selected: null, selfGrade: null, confidence: null }); setSaved(false); setMsg(null); setResult(null) }, [id])
 
   if (q.isLoading) return <Spinner />
   if (q.error || !q.data) return <ErrorBox error={q.error ?? 'Questão não encontrada'} retry={() => q.refetch()} />
@@ -43,10 +44,12 @@ export default function QuestaoPage() {
     setSaving(true); setMsg(null)
     try {
       const secs = Math.min(86400, Math.max(0, Math.round((Date.now() - t0.current) / 1000)))
-      await addAttempt({ question_id: id, selected_option: ans.selected, self_grade: ans.selfGrade, confidence: ans.confidence, time_seconds: secs })
+      const att = await addAttempt({ question_id: id, selected_option: ans.selected, self_grade: ans.selfGrade, confidence: ans.confidence, time_seconds: secs })
       setSaved(true)
       await qc.invalidateQueries({ queryKey: qk.attempts })
       setMsg({ ok: true, t: 'Resposta registrada.' })
+      // O gabarito oficial só é liberado pelo servidor depois que a resposta existe.
+      try { setResult({ key: await revealAnswer(id), isCorrect: att.is_correct }) } catch { /* sem gabarito: segue só com autoavaliação */ }
     } catch (e) { setMsg({ ok: false, t: errMsg(e) }) } finally { setSaving(false) }
   }
   async function errorCard() {
@@ -73,10 +76,23 @@ export default function QuestaoPage() {
         {msg && <p role={msg.ok ? 'status' : 'alert'} className={`text-sm ${msg.ok ? 'text-ok' : 'text-bad'}`}>{msg.t}</p>}
         <div className="flex flex-wrap gap-2">
           <Button onClick={save} loading={saving} disabled={saved}>Salvar resposta</Button>
-          {saved && ans.selfGrade === 'errei' && <Button variant="secondary" onClick={errorCard}>Criar card de revisão do erro</Button>}
+          {saved && (ans.selfGrade === 'errei' || result?.isCorrect === false) && <Button variant="secondary" onClick={errorCard}>Criar card de revisão do erro</Button>}
           {saved && queue && idx < queue.length - 1 && <Button variant="secondary" onClick={() => go(idx + 1)}>Próxima questão</Button>}
         </div>
-        <p className="text-xs text-muted">Sem gabarito no sistema: nenhuma correção automática. “Acertei/Errei” é sua conferência (autodeclarada).</p>
+        {result && (
+          <div role="status" className={`rounded-lg border p-3 text-sm ${result.key.status === 'anulada' || !result.isCorrect ? 'border-bad/40 bg-bad/10' : 'border-ok/40 bg-ok/10'}`}>
+            {result.key.status === 'anulada' ? (
+              <p><strong>Questão ANULADA</strong> pela banca: não conta como acerto nem erro.</p>
+            ) : (
+              <p>
+                Gabarito oficial: <strong>{result.key.correct_option}</strong>
+                {ans.selected ? <> — você marcou <strong>{ans.selected}</strong>: <strong>{result.isCorrect ? 'ACERTOU' : 'ERROU'}</strong></> : ' (você não marcou alternativa)'}.
+                {result.key.status === 'alterada' && ' Gabarito alterado após recursos.'}
+              </p>
+            )}
+          </div>
+        )}
+        <p className="text-xs text-muted">O gabarito oficial é liberado depois que você salva a resposta. A autoavaliação continua opcional.</p>
       </Card>
       <Card className="space-y-3">
         <div className="flex items-center gap-2">

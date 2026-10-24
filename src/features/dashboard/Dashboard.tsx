@@ -5,7 +5,7 @@ import { Badge, Button, Card, ErrorBox, PageTitle, Progress, Spinner, Stat } fro
 import { useSimulations } from '@/lib/queries'
 import { getSimAttempts } from '@/lib/api'
 import { useQuery } from '@tanstack/react-query'
-import { daysUntil } from '@/lib/metrics'
+import { daysUntil, effectiveGrade } from '@/lib/metrics'
 import { fmtDate } from '@/lib/utils'
 import { useDerived, useStudyData } from './usePlan'
 
@@ -24,8 +24,8 @@ export default function Dashboard() {
       const done = (sims.data ?? []).filter((s) => s.status === 'finalizado').slice(0, 20).reverse()
       return Promise.all(done.map(async (s) => {
         const at = await getSimAttempts(s.id)
-        const correct = at.filter((a) => a.self_grade === 'acertei').length
-        const graded = at.filter((a) => a.self_grade === 'acertei' || a.self_grade === 'errei').length
+        const correct = at.filter((a) => effectiveGrade(a) === 'acertei').length
+        const graded = at.filter((a) => { const g = effectiveGrade(a); return g === 'acertei' || g === 'errei' }).length
         return { data: fmtDate(s.finished_at ?? s.started_at), acertos: graded ? correct : null }
       }))
     },
@@ -101,7 +101,7 @@ export default function Dashboard() {
           <p className="text-sm">Próxima redação: <strong>{nextWriting}</strong></p>
         </Card>
         <Card>
-          <h2 className="mb-1 font-semibold">Evolução (simulados, autodeclarado)</h2>
+          <h2 className="mb-1 font-semibold">Evolução (simulados)</h2>
           {simPoints.data?.some((p) => p.acertos !== null) ? (
             <div className="h-48" role="img" aria-label="Gráfico de acertos autodeclarados por simulado">
               <ResponsiveContainer>

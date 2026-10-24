@@ -4,6 +4,16 @@ export interface AttemptLite {
   question_id: string
   created_at: string
   time_seconds?: number
+  key_status?: 'valida' | 'anulada' | 'alterada' | null
+  is_correct?: boolean | null
+}
+
+/** Nota efetiva da tentativa: gabarito oficial (se houver) prevalece sobre a autoavaliação; anulada nunca conta. */
+export function effectiveGrade(a: Pick<AttemptLite, 'self_grade' | 'key_status' | 'is_correct'>): 'acertei' | 'errei' | 'nao_sei' | null {
+  if (a.key_status === 'anulada') return null
+  if (a.is_correct === true) return 'acertei'
+  if (a.is_correct === false) return 'errei'
+  return a.self_grade ?? null
 }
 
 /** Taxa autodeclarada = acertei / (acertei + errei). Sem dados => null. */
@@ -13,12 +23,18 @@ export function selfRate(attempts: AttemptLite[]): number | null {
   return a + e === 0 ? null : a / (a + e)
 }
 
-/** Taxa verificada exige gabarito validado. Sem gabarito no sistema => sempre null ("N/A"). */
-export function verifiedRate(_attempts: AttemptLite[], key?: Record<string, string>): number | null {
-  if (!key || Object.keys(key).length === 0) return null
-  const rel = _attempts.filter((x) => key[x.question_id] && x.selected_option)
-  if (rel.length === 0) return null
-  return rel.filter((x) => key[x.question_id] === x.selected_option).length / rel.length
+/** Taxa com nota efetiva (gabarito oficial quando houver, senão autoavaliação). Sem dados => null. */
+export function effectiveRate(attempts: AttemptLite[]): number | null {
+  const g = attempts.map(effectiveGrade)
+  const a = g.filter((x) => x === 'acertei').length
+  const e = g.filter((x) => x === 'errei').length
+  return a + e === 0 ? null : a / (a + e)
+}
+
+/** Taxa verificada = acertos / tentativas com gabarito oficial aplicável (anuladas ficam de fora). Sem dados => null (N/A). */
+export function verifiedRate(attempts: AttemptLite[]): number | null {
+  const rel = attempts.filter((x) => x.is_correct === true || x.is_correct === false)
+  return rel.length === 0 ? null : rel.filter((x) => x.is_correct === true).length / rel.length
 }
 
 export function fmtPct(x: number | null): string {
