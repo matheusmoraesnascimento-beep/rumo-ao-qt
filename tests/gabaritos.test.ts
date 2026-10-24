@@ -53,10 +53,14 @@ describe('extração do gabarito: coluna da COR certa', () => {
 
 const file = path.resolve(import.meta.dirname, '../dados/gabaritos_informatica.json')
 describe.skipIf(!existsSync(file))('gabaritos oficiais extraídos (dados locais)', () => {
-  const g = JSON.parse(readFileSync(file, 'utf8')) as Record<string, { cor: string; colunas: string[]; questoes: KeyEntry[] }>
-  const ans = (y: number, n: number) => g[y].questoes.find((q) => q.number === n)!
+  // leitura preguiçosa: em CI (sem dados/) o describe é pulado e nada é lido
+  type G = Record<string, { cor: string; colunas: string[]; questoes: KeyEntry[] }>
+  let cache: G | null = null
+  const load = (): G => (cache ??= JSON.parse(readFileSync(file, 'utf8')) as G)
+  const ans = (y: number, n: number) => load()[y].questoes.find((q) => q.number === n)!
 
   it('5 anos × 50, cor do caderno correta e presente nas colunas do PDF', () => {
+    const g = load()
     for (const y of [2022, 2023, 2024, 2025, 2026]) {
       expect(g[y].questoes).toHaveLength(50)
       expect(g[y].cor).toBe(CADERNO_COR[y])
@@ -65,10 +69,11 @@ describe.skipIf(!existsSync(file))('gabaritos oficiais extraídos (dados locais)
     expect(CADERNO_COR[2026]).toBe('ROSA')
   })
   it('anuladas esperadas: 2022 Q28, 2024 Q03, 2025 Q17 e Q31; 2022 Q01 alterada para E', () => {
+    const g = load()
     const an = Object.entries(g).flatMap(([y, v]) => v.questoes.filter((q) => q.status === 'anulada').map((q) => `${y}-${q.number}`))
     expect(an.sort()).toEqual(['2022-28', '2024-3', '2025-17', '2025-31'])
     expect(ans(2022, 1)).toMatchObject({ answer: 'E', status: 'alterada' })
-    expect(g[2026].questoes.every((q) => q.status === 'valida')).toBe(true)
+    expect(load()[2026].questoes.every((q) => q.status === 'valida')).toBe(true)
   })
   it('conferência por CONTEÚDO (questões resolvíveis lendo o enunciado)', () => {
     // 2023: criptografia (E), exclusão mútua (E), RIP/OSPF/BGP (C), quicksort (E), serviço de TI (E), crontab (A), PERT 49,83 (D)
