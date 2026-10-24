@@ -1,0 +1,66 @@
+name: Deploy GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --legacy-peer-deps
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm run test
+      - name: Build
+        run: npm run build
+        env:
+          # Valores PÚBLICOS (anon/publishable). Defina em Settings > Secrets and variables > Actions > Variables.
+          VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
+          VITE_APP_BASE_PATH: /${{ github.event.repository.name }}/
+      - name: Verificar que o bundle não contém segredos
+        run: |
+          if grep -rIlE "service_role|sb_secret_" dist; then echo "Possível segredo no bundle"; exit 1; fi
+          test ! -d dist/dados && test ! -d dist/provas
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    outputs:
+      page_url: ${{ steps.deployment.outputs.page_url }}
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
+
+  smoke:
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Smoke test da URL publicada
+        run: |
+          URL="${{ needs.deploy.outputs.page_url }}"
+          code=$(curl -s -o /tmp/index.html -w "%{http_code}" "$URL")
+          test "$code" = "200"
+          grep -q "Rumo ao QT" /tmp/index.html
