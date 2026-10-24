@@ -7,11 +7,16 @@ import { supabase, siteUrl, isConfigured } from '@/lib/supabase'
 import { Button, Card, Field, Input } from '@/components/ui'
 import { useAuth } from '@/app/auth'
 import { errMsg } from '@/lib/utils'
+import { isUsername, toLoginEmail } from '@/lib/login'
 import { Anchor } from 'lucide-react'
 
 const credSchema = z.object({
   email: z.string().trim().email('E-mail inválido'),
   password: z.string().min(8, 'Mínimo de 8 caracteres'),
+})
+const loginSchema = z.object({
+  email: z.string().trim().min(1, 'Informe usuário ou e-mail').refine((v) => v.includes('@') ? z.string().email().safeParse(v).success : isUsername(v), 'Usuário ou e-mail inválido'),
+  password: z.string().min(1, 'Informe a senha'),
 })
 const emailOnly = z.object({ email: z.string().trim().email('E-mail inválido') })
 type Cred = z.infer<typeof credSchema>
@@ -45,7 +50,7 @@ export function LoginPage() {
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null)
   const [busy, setBusy] = useState(false)
   const { register, handleSubmit, formState: { errors } } = useForm<Cred>({
-    resolver: zodResolver((mode === 'forgot' || mode === 'magic' ? emailOnly : credSchema) as unknown as typeof credSchema),
+    resolver: zodResolver((mode === 'login' ? loginSchema : mode === 'signup' ? credSchema : emailOnly) as unknown as typeof credSchema),
   })
 
   if (!isConfigured) return <SetupNeeded />
@@ -56,7 +61,7 @@ export function LoginPage() {
     setBusy(true); setMsg(null)
     try {
       if (mode === 'login') {
-        const { error } = await supabase.auth.signInWithPassword({ email: v.email, password: v.password })
+        const { error } = await supabase.auth.signInWithPassword({ email: toLoginEmail(v.email), password: v.password })
         if (error) throw error
         nav('/', { replace: true })
       } else if (mode === 'signup') {
@@ -81,8 +86,8 @@ export function LoginPage() {
   return (
     <Shell title={titles[mode]}>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-3" noValidate>
-        <Field label="E-mail" error={errors.email?.message}>
-          <Input type="email" autoComplete="email" {...register('email')} />
+        <Field label={mode === 'login' ? 'Usuário ou e-mail' : 'E-mail'} error={errors.email?.message}>
+          <Input type={mode === 'login' ? 'text' : 'email'} autoComplete={mode === 'login' ? 'username' : 'email'} autoCapitalize="none" {...register('email')} />
         </Field>
         {(mode === 'login' || mode === 'signup') && (
           <Field label="Senha" error={errors.password?.message}>
