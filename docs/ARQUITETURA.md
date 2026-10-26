@@ -10,7 +10,7 @@ Navegador (GitHub Pages, estático)
                                           ├─ Postgres + RLS (auth.uid())
                                           │    ├─ catálogo (somente leitura p/ autenticados)
                                           │    └─ dados do estudante (CRUD só do dono)
-                                          ├─ RPC review_card / reschedule_card / delete_my_account
+                                          ├─ RPC review_card / reschedule_card / concluir_assunto / delete_my_account
                                           └─ Storage privado: provas (URL assinada), redacoes (pasta = uid)
 ```
 
@@ -18,6 +18,7 @@ Navegador (GitHub Pages, estático)
 
 - `src/lib/api.ts` — único ponto que fala com o Supabase; erros viram exceções com mensagem útil.
 - `src/lib/{srs,planner,simulado,filtros,metrics,backup}.ts` — lógica pura e testável (sem React).
+- Rota `/edital/:topicId` — editor de anotações do assunto (folha); concluir cria a aula de revisão e leva a `/revisoes`.
 - `src/features/*` — telas: dashboard, edital, estudos (check-in), calendario (agenda), questoes, simulados, revisoes, redacao, relatorios (análise), config, auth.
 - `supabase/migrations` — schema, RLS, RPCs, storage. `supabase/seed*.sql` — gerados por `scripts/gerar-seed.ts`.
 

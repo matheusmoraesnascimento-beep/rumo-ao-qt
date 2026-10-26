@@ -43,3 +43,21 @@ body {
 .safe-bottom {
   padding-bottom: env(safe-area-inset-bottom);
 }
+
+.notas-doc h1 { font-size: 1.5rem; font-weight: 700; margin: 1rem 0 0.5rem; }
+.notas-doc h2 { font-size: 1.25rem; font-weight: 700; margin: 0.9rem 0 0.4rem; }
+.notas-doc h3 { font-size: 1.1rem; font-weight: 600; margin: 0.8rem 0 0.3rem; }
+.notas-doc p { margin: 0.4rem 0; }
+.notas-doc ul { list-style: disc; padding-left: 1.4rem; }
+.notas-doc ol { list-style: decimal; padding-left: 1.4rem; }
+.notas-doc blockquote { border-left: 3px solid var(--color-line); padding-left: 0.75rem; color: var(--color-muted); }
+.notas-doc pre { background: var(--color-bg); border: 1px solid var(--color-line); border-radius: 0.5rem; padding: 0.6rem; overflow-x: auto; }
+.notas-doc code { font-family: ui-monospace, monospace; font-size: 0.9em; }
+.notas-doc mark { background: color-mix(in srgb, var(--color-warn) 35%, transparent); color: inherit; border-radius: 2px; }
+.notas-doc table { border-collapse: collapse; width: 100%; margin: 0.6rem 0; display: block; overflow-x: auto; }
+.notas-doc th, .notas-doc td { border: 1px solid var(--color-line); padding: 0.35rem 0.5rem; min-width: 4rem; vertical-align: top; }
+.notas-doc th { background: var(--color-bg); font-weight: 600; text-align: left; }
+.notas-doc ul[data-type='taskList'] { list-style: none; padding-left: 0.2rem; }
+.notas-doc ul[data-type='taskList'] li { display: flex; gap: 0.5rem; align-items: flex-start; }
+.notas-doc ul[data-type='taskList'] li > label { margin-top: 0.2rem; }
+.notas-doc ul[data-type='taskList'] li > div { flex: 1; }

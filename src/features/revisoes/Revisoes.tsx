@@ -1,9 +1,12 @@
 import { useMemo, useRef, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { Badge, Button, Card, Empty, ErrorBox, Field, Input, PageTitle, Spinner, Textarea } from '@/components/ui'
 import { createCard, deleteCard, getReviewEvents, rescheduleCard, reviewCard } from '@/lib/api'
-import { qk, useCards, useSettings, useTopics } from '@/lib/queries'
+import { qk, useCards, useProgress, useSettings, useTopics } from '@/lib/queries'
+import { initialNotesHtml, isEmptyNotes } from '@/lib/notas'
+import { NotasLeitura } from '@/features/edital/NotasLeitura'
 import { dailyQueue, firstDueAt, RATING_LABELS, type Rating } from '@/lib/srs'
 import { errMsg, fmtDate, fmtDateTime, uuid } from '@/lib/utils'
 import { formatInTimeZone } from 'date-fns-tz'
@@ -11,7 +14,7 @@ import { DEFAULT_TZ } from '@/lib/srs'
 
 export default function Revisoes() {
   const qc = useQueryClient()
-  const cards = useCards(), settings = useSettings(), topics = useTopics()
+  const cards = useCards(), settings = useSettings(), topics = useTopics(), progress = useProgress()
   const [flip, setFlip] = useState(false)
   const [done, setDone] = useState(0)
   const [msg, setMsg] = useState<string | null>(null)
@@ -31,6 +34,8 @@ export default function Revisoes() {
   const cur = queue[0]
   const upcoming = (cards.data ?? []).filter((c) => new Date(c.due_at) > now).slice(0, 15)
   const topicName = (id: string | null) => topics.data?.find((t) => t.id === id)?.name
+  const cardTitle = (c: { kind: string; front: string; topic_id: string | null }) => (c.kind === 'aula' ? topicName(c.topic_id) ?? c.front : c.front)
+  const resumo = cur?.kind === 'aula' ? initialNotesHtml(progress.data?.find((p) => p.topic_id === cur.topic_id)) : ''
 
   async function rate(r: Rating) {
     if (!cur || busy) return
@@ -45,6 +50,19 @@ export default function Revisoes() {
       setMsg(`Não foi possível salvar (${errMsg(e)}). Toque de novo para reenviar — não será contado em duplicidade.`)
     } finally { setBusy(false) }
   }
+
+  const ratingBlock = (
+    <>
+      <p className="text-sm font-medium">Como foi a lembrança?</p>
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-6">
+        {([0, 1, 2, 3, 4, 5] as Rating[]).map((r) => (
+          <Button key={r} variant={r <= 2 ? 'secondary' : 'primary'} disabled={busy} onClick={() => rate(r)} className="flex-col py-2">
+            <span className="text-base font-semibold">{r}</span><span className="text-[11px] font-normal">{RATING_LABELS[r]}</span>
+          </Button>
+        ))}
+      </div>
+    </>
+  )
 
   const byDay = new Map<string, number>()
   for (let i = 13; i >= 0; i--) byDay.set(formatInTimeZone(new Date(Date.now() - i * 86400000), DEFAULT_TZ, 'dd/MM'), 0)
@@ -63,20 +81,26 @@ export default function Revisoes() {
               <span>{done + 1}º card de hoje {topicName(cur.topic_id) && `· ${topicName(cur.topic_id)}`}</span>
               <span>vencia em {fmtDate(cur.due_at)} · nível {cur.level} · {cur.lapses} lapso(s)</span>
             </div>
-            <div className="min-h-32 whitespace-pre-wrap rounded-xl border border-line p-4 text-lg">{cur.front}</div>
-            {flip ? (
+            {cur.kind === 'aula' ? (
               <>
-                <div className="whitespace-pre-wrap rounded-xl border border-sea/40 bg-sea/10 p-4">{cur.back || <span className="text-muted">(sem verso)</span>}</div>
-                <p className="text-sm font-medium">Como foi a lembrança?</p>
-                <div className="grid grid-cols-2 gap-2 sm:grid-cols-6">
-                  {([0, 1, 2, 3, 4, 5] as Rating[]).map((r) => (
-                    <Button key={r} variant={r <= 2 ? 'secondary' : 'primary'} disabled={busy} onClick={() => rate(r)} className="flex-col py-2">
-                      <span className="text-base font-semibold">{r}</span><span className="text-[11px] font-normal">{RATING_LABELS[r]}</span>
-                    </Button>
-                  ))}
+                <div className="rounded-xl border border-line p-4">
+                  <h2 className="text-lg font-semibold">{cardTitle(cur)}</h2>
+                  {isEmptyNotes(resumo) ? <p className="mt-2 text-sm text-muted">(resumo vazio)</p> : <NotasLeitura html={resumo} />}
+                  <Link to={`/edital/${cur.topic_id}`} className="mt-2 inline-block text-sm text-sea underline">Editar resumo</Link>
                 </div>
+                {ratingBlock}
               </>
-            ) : <Button onClick={() => setFlip(true)}>Mostrar verso</Button>}
+            ) : (
+              <>
+                <div className="min-h-32 whitespace-pre-wrap rounded-xl border border-line p-4 text-lg">{cur.front}</div>
+                {flip ? (
+                  <>
+                    <div className="whitespace-pre-wrap rounded-xl border border-sea/40 bg-sea/10 p-4">{cur.back || <span className="text-muted">(sem verso)</span>}</div>
+                    {ratingBlock}
+                  </>
+                ) : <Button onClick={() => setFlip(true)}>Mostrar verso</Button>}
+              </>
+            )}
             {msg && <p role="alert" className="text-sm text-bad">{msg}</p>}
           </>
         )}
@@ -105,11 +129,11 @@ export default function Revisoes() {
           <ul className="divide-y divide-line">
             {upcoming.map((c) => (
               <li key={c.id} className="flex items-center justify-between gap-2 py-2 text-sm">
-                <div className="min-w-0"><div className="truncate font-medium">{c.front}</div><div className="text-xs text-muted">{fmtDateTime(c.due_at)} · nível {c.level}</div></div>
+                <div className="min-w-0"><div className="truncate font-medium">{cardTitle(c)}</div><div className="text-xs text-muted">{fmtDateTime(c.due_at)} · nível {c.level}</div></div>
                 <div className="flex shrink-0 gap-1">
-                  <Badge>{c.algorithm}</Badge>
+                  <Badge>{c.kind === 'aula' ? 'aula' : c.algorithm}</Badge>
                   <Button size="sm" variant="ghost" onClick={async () => { await rescheduleCard(c.id, new Date(new Date(c.due_at).getTime() + 3 * 86400000).toISOString(), 'adiado +3 dias'); qc.invalidateQueries({ queryKey: qk.cards }) }}>+3 dias</Button>
-                  <Button size="sm" variant="ghost" onClick={async () => { if (confirm('Excluir card e seu histórico?')) { await deleteCard(c.id); qc.invalidateQueries({ queryKey: qk.cards }) } }}>Excluir</Button>
+                  <Button size="sm" variant="ghost" onClick={async () => { if (confirm(c.kind === 'aula' ? 'Excluir esta aula? O assunto continua como está e pode ser concluído de novo.' : 'Excluir card e seu histórico?')) { await deleteCard(c.id); qc.invalidateQueries({ queryKey: qk.cards }) } }}>Excluir</Button>
                 </div>
               </li>
             ))}

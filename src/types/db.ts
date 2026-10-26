@@ -33,7 +33,7 @@ export interface Settings {
 }
 export interface TopicProgress {
   user_id: string; topic_id: string; status: TopicStatus; confidence: number
-  notes: string | null; first_studied_at: string | null; last_studied_at: string | null
+  notes: string | null; notes_html: string | null; first_studied_at: string | null; last_studied_at: string | null
 }
 export interface StudySession {
   id: string; user_id: string; topic_id: string | null; started_at: string; ended_at: string | null
@@ -54,7 +54,7 @@ export interface Simulation {
 }
 export interface ReviewCard {
   id: string; user_id: string; topic_id: string | null; question_id: string | null
-  front: string; back: string; algorithm: string; level: number; due_at: string
+  kind: 'card' | 'aula'; front: string; back: string; algorithm: string; level: number; due_at: string
   last_reviewed_at: string | null; lapses: number; review_count: number; created_at: string
 }
 export interface WritingPrompt {
