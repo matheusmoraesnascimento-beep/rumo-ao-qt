@@ -47,7 +47,7 @@ describe('schema', () => {
       'profiles','user_settings','topic_progress','study_sessions','study_blocks','blocked_days',
       'simulations','question_attempts','question_flags','question_reports','user_question_topics',
       'review_cards','review_events','review_reschedule_log','writing_submissions','writing_feedback',
-      'writing_prompts','import_audit','admins',
+      'writing_prompts','import_audit','admins','topic_question_logs',
     ]
     const r = await db.query<{ relname: string; relrowsecurity: boolean; relforcerowsecurity: boolean }>(
       `select relname, relrowsecurity, relforcerowsecurity from pg_class
