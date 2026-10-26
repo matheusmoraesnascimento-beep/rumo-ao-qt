@@ -7,6 +7,7 @@ import { Spinner } from '@/components/ui'
 
 const Dashboard = lazy(() => import('@/features/dashboard/Dashboard'))
 const Edital = lazy(() => import('@/features/edital/Edital'))
+const NotasPage = lazy(() => import('@/features/edital/NotasPage'))
 const Agenda = lazy(() => import('@/features/calendario/Agenda'))
 const Questoes = lazy(() => import('@/features/questoes/Questoes'))
 const QuestaoPage = lazy(() => import('@/features/questoes/QuestaoPage'))
@@ -27,6 +28,7 @@ export function App() {
         <Route element={<RequireAuth><Layout /></RequireAuth>}>
           <Route index element={<Dashboard />} />
           <Route path="edital" element={<Edital />} />
+          <Route path="edital/:topicId" element={<NotasPage />} />
           <Route path="agenda" element={<Agenda />} />
           <Route path="questoes" element={<Questoes />} />
           <Route path="questoes/classificar" element={<Classificar />} />
