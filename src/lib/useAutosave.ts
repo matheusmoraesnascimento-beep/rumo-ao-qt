@@ -39,7 +39,7 @@ export function useAutosave({ storageKey, value, saved, save, delayMs = 1500 }: 
   const [status, setStatus] = useState<AutosaveStatus>('salvo')
   const latest = useRef({ value, save, storageKey })
   latest.current = { value, save, storageKey }
-  const timer = useRef<ReturnType<typeof setTimeout>>()
+  const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
 
   const attempt = useCallback(async (): Promise<void> => {
     clearTimeout(timer.current)
