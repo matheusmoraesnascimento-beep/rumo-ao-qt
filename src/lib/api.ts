@@ -1,5 +1,6 @@
 /** Camada repositório: todo acesso ao Supabase passa por aqui. Erros viram exceções com mensagem útil. */
 import { supabase } from './supabase'
+import { DEFAULT_TZ } from './srs'
 import type {
   Attempt, Exam, Question, QuestionLite, ReviewCard, Settings, Simulation, StudySession, Topic,
   TopicProgress, WritingFeedback, WritingPrompt, WritingSubmission,
@@ -53,6 +54,15 @@ export const getProgress = async () => ok(await supabase.from('topic_progress').
 export async function upsertProgress(p: Partial<TopicProgress> & { topic_id: string }) {
   const now = new Date().toISOString()
   ok(await supabase.from('topic_progress').upsert({ user_id: await uid(), ...p, updated_at: now }, { onConflict: 'user_id,topic_id' }))
+}
+
+export async function saveNotesHtml(topicId: string, html: string) {
+  await upsertProgress({ topic_id: topicId, notes_html: html })
+}
+export async function concluirAssunto(p: { topicId: string; done?: number; correct?: number }) {
+  return ok(await supabase.rpc('concluir_assunto', {
+    p_topic_id: p.topicId, p_done: p.done ?? null, p_correct: p.correct ?? null, p_tz: DEFAULT_TZ,
+  })) as ReviewCard
 }
 
 // ---- sessões ----
