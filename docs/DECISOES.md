@@ -18,3 +18,4 @@
 | Modo offline | Não implementado | Não prometer sync sem reconciliação |
 | Lembrete diário | Web Push enviado por GitHub Actions agendado (30 min), autorizado por token próprio revogável (hash em `reminder_bots`), sem `service_role` | Sem servidor e sem expor chave privilegiada; trade-off: atraso de minutos e pausa do GitHub após 60 dias sem atividade |
 | PWA | Service worker só do casco estático; sem `skipWaiting`; outras origens (Supabase) nunca interceptadas | Dados sempre frescos; versão nova não quebra abas abertas; não promete offline |
+| Anotações e aulas | Resumo por assunto em HTML (`topic_progress.notes_html`, Tiptap); "Concluir assunto" cria 1 aula (`review_cards.kind='aula'`) pelo RPC `concluir_assunto`, reaproveitando `interval-v1`; sem backfill das notas antigas (`notes` é mostrado escapado até a primeira edição) | Sem segundo motor de revisão; HTML só é renderizado por Tiptap `editable:false`, nunca por `dangerouslySetInnerHTML` |

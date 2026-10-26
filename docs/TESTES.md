@@ -13,6 +13,7 @@
 | Classificação em lote | `tests/classificar.test.tsx`, `tests/sugestao.test.ts` | sugestão por OCR sem gravar, seleção, salvar/avançar, atalhos, progresso, erro de rede; dicionário x edital |
 | Lembrete e PWA | `tests/db/lembretes.test.ts`, `tests/lembretes.test.ts`, `tests/lembretes-ui.test.tsx`, `tests/e2e/pwa.spec.ts` | token do remetente, janela/fuso/dia bloqueado/1 por dia, RLS das inscrições; mensagem; ligar/desligar; manifest, service worker em subpasta, abrir sem rede, evento push real virando notificação |
 | Redação | `tests/redacao.test.tsx` | autosave, versões, rótulos não oficiais |
+| Anotações e aulas | `tests/db/aulas.test.ts`, `tests/notas.test.ts`, `tests/useAutosave.test.tsx`, `tests/notas-editor.test.tsx`, `tests/notas-page.test.tsx`, `tests/revisoes-aula.test.tsx` | RPC `concluir_assunto` (idempotente, status, log de questões, RLS, limite de 200 mil caracteres); escape de notas antigas; autosave com rascunho local e retry; editor/leitura sem `<script>`; página, redirecionamentos e diálogo de conclusão; aula na fila de revisões |
 | E2E | `tests/e2e/smoke.spec.ts` | build em `/rumo-ao-qt/`, deep link/refresh, mobile sem scroll horizontal, provas não servidas pelo Pages |
 
 ## Limites conhecidos

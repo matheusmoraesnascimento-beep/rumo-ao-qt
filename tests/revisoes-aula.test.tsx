@@ -15,7 +15,7 @@ const api = vi.hoisted(() => ({
   getTopics: vi.fn(async () => [{ id: 't1', syllabus_version_id: 'v', parent_id: null, name: 'Nome atual', slug: 'n', ordinal: 0 }]),
   getProgress: vi.fn(async () => [{ user_id: 'u', topic_id: 't1', status: 'revisando', confidence: 1, notes: null, notes_html: '<p>meu resumo</p>', first_studied_at: null, last_studied_at: null }]),
   getReviewEvents: vi.fn(async () => []),
-  reviewCard: vi.fn(async (_id: string, _r: number, _e: string, _tz: string) => ({})),
+  reviewCard: vi.fn<(id: string, rating: number, eventId: string, tz: string) => Promise<object>>(async () => ({})),
   deleteCard: vi.fn(async () => undefined),
   rescheduleCard: vi.fn(async () => ({})),
 }))
