@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { dailyQueue, firstDueAt, nextReview } from '../src/lib/srs'
 import { isWritingDue, planDay, rankTopics, scoreTopic, type TopicSignal } from '../src/lib/planner'
 import { buildMixedSimulation, buildYearSimulation, summarizeSimulation, type QRef } from '../src/lib/simulado'
-import { daysUntil, fmtPct, safeMinutes, selfRate, verifiedRate, wordCount } from '../src/lib/metrics'
+import { daysUntil, fmtPct, safeMinutes, selfRate, verifiedDistinct, verifiedRate, wordCount } from '../src/lib/metrics'
 
 const at = new Date('2025-03-10T15:00:00Z')
 
@@ -158,6 +158,17 @@ describe('simulados', () => {
 })
 
 describe('métricas', () => {
+  it('diagnóstico conta cada questão verificada uma vez, usando a tentativa mais recente', () => {
+    const attempts = [
+      { question_id: 'a', created_at: '2026-01-01', is_correct: false },
+      { question_id: 'a', created_at: '2026-01-02', is_correct: true },
+      { question_id: 'b', created_at: '2026-01-02', self_grade: 'errei' as const },
+      { question_id: 'c', created_at: '2026-01-02', key_status: 'anulada' as const, is_correct: false },
+      { question_id: 'd', created_at: '2026-01-02', is_correct: false },
+    ]
+    expect(verifiedDistinct(attempts)).toEqual({ attempts: 2, errors: 1 })
+    expect(verifiedRate([attempts[3]])).toBeNull()
+  })
   it('taxa verificada é N/A sem gabarito; autodeclarada rotulada', () => {
     const at = [
       { question_id: 'a', created_at: '', self_grade: 'acertei' as const, selected_option: 'A' },

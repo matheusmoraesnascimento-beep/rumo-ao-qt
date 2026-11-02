@@ -29,6 +29,8 @@ Ferramenta independente de estudos. Não oficial e sem vínculo com a Marinha do
 
 **Não implementado (honesto):** editor `/admin/conferencia` de OCR (a revisão é feita por SQL/CLI, veja `docs/IMPORTACAO_QUESTOES.md`); modo offline de verdade (o app abre sem rede, mas dados e gravações exigem internet); FSRS; IA para redação.
 
+**Ciclos e passagens:** a evolução está em andamento. O planejador atual fornece sugestões, mas ainda não persiste ciclos, cursor ou passagens. A auditoria do banco implantado é necessária antes de criar migrations; consulte `docs/AUDITORIA_BANCO_E_APLICACAO.md`, `docs/REGRAS_CICLOS_PASSAGENS.md` e `docs/MIGRACAO_PAPIRO_LIKE.md`.
+
 ## Pré-requisitos
 
 Node 22+, uma conta GitHub e uma conta Supabase (plano gratuito basta).

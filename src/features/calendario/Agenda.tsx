@@ -24,7 +24,7 @@ function Timer() {
   const [params] = useSearchParams()
   const [t, setT] = useState<TimerState | null>(load)
   const [, tick] = useState(0)
-  const [topic, setTopic] = useState(t?.topicId ?? '')
+  const [topic, setTopic] = useState(t?.topicId ?? params.get('topico') ?? '')
   const [msg, setMsg] = useState<{ ok: boolean; t: string } | null>(null)
   const [saving, setSaving] = useState(false)
   const started = useRef(false)

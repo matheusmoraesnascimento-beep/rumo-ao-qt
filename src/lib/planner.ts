@@ -17,8 +17,8 @@ export interface TopicSignal {
   lastStudiedAt: Date | null
   overdueCards: number
   maxOverdueDays: number
-  attempts: number // tentativas autoavaliadas ligadas ao tema
-  errors: number // autoavaliadas como "errei"
+  attempts: number // questões distintas com resultado verificado
+  errors: number // resultados verificados incorretos
 }
 
 export interface Scored {
@@ -52,7 +52,8 @@ export function scoreTopic(t: TopicSignal, today: Date): Scored {
   if (t.overdueCards > 0) reasons.push(`${t.overdueCards} revisão(ões) vencida(s), a mais antiga há ${t.maxOverdueDays} dia(s)`)
   if (t.status === 'nao_iniciado') reasons.push('assunto do edital ainda não iniciado')
   else if (t.status !== 'consolidado') reasons.push('assunto do edital não concluído')
-  if (t.errors > 0) reasons.push(`${t.errors} erro(s) autodeclarado(s) em ${t.attempts} questão(ões)`)
+  if (t.attempts > 0) reasons.push(`${t.errors} erro(s) verificado(s) em ${t.attempts} questão(ões) distintas${t.attempts < 10 ? ' (amostra insuficiente)' : ''}`)
+  else reasons.push('sem questões com resultado verificado')
   if (daysSince === null) reasons.push('nunca estudado')
   else if (daysSince >= 7) reasons.push(`sem contato há ${daysSince} dias`)
   if (t.confidence <= 2) reasons.push(`confiança baixa (${t.confidence}/5)`)

@@ -5,11 +5,11 @@ import { Badge, Button, Card, ErrorBox, PageTitle, Progress, Spinner, Stat } fro
 import { useSimulations } from '@/lib/queries'
 import { getSimAttempts } from '@/lib/api'
 import { useQuery } from '@tanstack/react-query'
-import { daysUntil, effectiveGrade } from '@/lib/metrics'
+import { daysUntil } from '@/lib/metrics'
 import { fmtDate } from '@/lib/utils'
 import { useDerived, useStudyData } from './usePlan'
 
-const TIMES = [15, 25, 45, 60, 120]
+const TIMES = [15, 25, 45, 60, 90, 120]
 const KIND_LABEL = { revisao: 'Revisão', teoria: 'Teoria', questoes: 'Questões', redacao: 'Redação' } as const
 
 export default function Dashboard() {
@@ -24,9 +24,9 @@ export default function Dashboard() {
       const done = (sims.data ?? []).filter((s) => s.status === 'finalizado').slice(0, 20).reverse()
       return Promise.all(done.map(async (s) => {
         const at = await getSimAttempts(s.id)
-        const correct = at.filter((a) => effectiveGrade(a) === 'acertei').length
-        const graded = at.filter((a) => { const g = effectiveGrade(a); return g === 'acertei' || g === 'errei' }).length
-        return { data: fmtDate(s.finished_at ?? s.started_at), acertos: graded ? correct : null }
+        const verified = at.filter((a) => a.key_status !== 'anulada' && a.is_correct != null)
+        const self = at.filter((a) => a.self_grade === 'acertei' || a.self_grade === 'errei')
+        return { data: fmtDate(s.finished_at ?? s.started_at), verificados: verified.length ? verified.filter((a) => a.is_correct).length : null, autodeclarados: self.length ? self.filter((a) => a.self_grade === 'acertei').length : null }
       }))
     },
   })
@@ -84,6 +84,9 @@ export default function Dashboard() {
                   <summary className="cursor-pointer">Por quê?</summary>
                   <p className="mt-1">{b.reasons.join('; ') || '—'}</p>
                 </details>
+                <Link className="mt-2 inline-block text-sm font-medium text-sea underline" to={b.kind === 'revisao' ? '/revisoes' : b.kind === 'redacao' ? '/redacao' : b.kind === 'questoes' ? '/questoes?modo=ineditas' : `/agenda?iniciar=${b.minutes}${b.topicId ? `&topico=${encodeURIComponent(b.topicId)}` : ''}`}>
+                  {b.kind === 'revisao' ? 'Abrir revisões' : b.kind === 'redacao' ? 'Abrir redação' : b.kind === 'questoes' ? 'Abrir questões' : 'Estudar este tópico'}
+                </Link>
               </li>
             ))}
           </ul>
@@ -96,14 +99,14 @@ export default function Dashboard() {
           <Progress value={x.cov.pct} label="Progresso do edital" />
           <p className="text-sm text-muted">{x.cov.done}/{x.cov.total} assuntos iniciados · base provisória CP-T/2026</p>
           {x.weakest && (
-            <p className="text-sm">Tópico mais fraco: <strong>{topicName(x.weakest.topicId)}</strong><br /><span className="text-muted">{x.weakest.reasons.join('; ')}</span></p>
+            <p className="text-sm">Tópico prioritário: <strong>{topicName(x.weakest.topicId)}</strong><br /><span className="text-muted">{x.weakest.reasons.join('; ')}</span></p>
           )}
           <p className="text-sm">Próxima redação: <strong>{nextWriting}</strong></p>
         </Card>
         <Card>
           <h2 className="mb-1 font-semibold">Evolução (simulados)</h2>
-          {simPoints.data?.some((p) => p.acertos !== null) ? (
-            <div className="h-48" role="img" aria-label="Gráfico de acertos autodeclarados por simulado">
+          {simPoints.data?.some((p) => p.verificados !== null || p.autodeclarados !== null) ? (
+            <div className="h-48" role="img" aria-label="Gráfico de acertos verificados e autodeclarados por simulado">
               <ResponsiveContainer>
                 <LineChart data={simPoints.data}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--color-line)" />
@@ -112,12 +115,13 @@ export default function Dashboard() {
                   <Tooltip />
                   <ReferenceLine y={s.baseline_2026} stroke="var(--color-muted)" strokeDasharray="4 4" label={{ value: 'base 2026', fontSize: 10, fill: 'var(--color-muted)' }} />
                   <ReferenceLine y={s.goal_correct} stroke="var(--color-ok)" strokeDasharray="4 4" label={{ value: 'objetivo', fontSize: 10, fill: 'var(--color-ok)' }} />
-                  <Line type="monotone" dataKey="acertos" stroke="var(--color-sea)" strokeWidth={2} connectNulls />
+                  <Line type="monotone" dataKey="verificados" name="Verificados" stroke="var(--color-sea)" strokeWidth={2} />
+                  <Line type="monotone" dataKey="autodeclarados" name="Autodeclarados" stroke="var(--color-ok)" strokeWidth={2} />
                 </LineChart>
               </ResponsiveContainer>
             </div>
           ) : (
-            <p className="text-sm text-muted">Sem simulados finalizados com autoavaliação. A linha tracejada de {s.baseline_2026}/50 (2026) é só a base histórica declarada.</p>
+            <p className="text-sm text-muted">Sem simulados finalizados com correção ou autoavaliação. A linha tracejada de {s.baseline_2026}/50 (2026) é só a base histórica declarada.</p>
           )}
         </Card>
       </div>

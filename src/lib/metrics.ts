@@ -33,8 +33,19 @@ export function effectiveRate(attempts: AttemptLite[]): number | null {
 
 /** Taxa verificada = acertos / tentativas com gabarito oficial aplicável (anuladas ficam de fora). Sem dados => null (N/A). */
 export function verifiedRate(attempts: AttemptLite[]): number | null {
-  const rel = attempts.filter((x) => x.is_correct === true || x.is_correct === false)
+  const rel = attempts.filter((x) => x.key_status !== 'anulada' && (x.is_correct === true || x.is_correct === false))
   return rel.length === 0 ? null : rel.filter((x) => x.is_correct === true).length / rel.length
+}
+
+/** Resultado verificado mais recente de cada questão, sem contar anuladas. */
+export function verifiedDistinct(attempts: AttemptLite[]): { attempts: number; errors: number } {
+  const byQuestion = new Map<string, AttemptLite>()
+  for (const a of attempts) {
+    if (a.key_status === 'anulada' || a.is_correct == null) continue
+    const previous = byQuestion.get(a.question_id)
+    if (!previous || a.created_at > previous.created_at) byQuestion.set(a.question_id, a)
+  }
+  return { attempts: byQuestion.size, errors: [...byQuestion.values()].filter((a) => a.is_correct === false).length }
 }
 
 export function fmtPct(x: number | null): string {

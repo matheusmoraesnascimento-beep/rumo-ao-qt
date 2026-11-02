@@ -7,7 +7,7 @@ import {
 import { isWritingDue, planDay, rankTopics, type PlanBlock, type Scored, type TopicSignal } from '@/lib/planner'
 import { dailyQueue } from '@/lib/srs'
 import { todayLocal, weekdayKey } from '@/lib/utils'
-import { coverage, effectiveGrade } from '@/lib/metrics'
+import { coverage, verifiedDistinct } from '@/lib/metrics'
 
 export function useStudyData() {
   const settings = useSettings(), topics = useTopics(), progress = useProgress(), cards = useCards()
@@ -35,15 +35,12 @@ export function useDerived(d: StudyData, minutesOverride?: number) {
     const qTopic = new Map<string, string[]>()
     for (const r of d.uqt) qTopic.set(r.question_id, [...(qTopic.get(r.question_id) ?? []), r.topic_id])
 
-    const stat = new Map<string, { attempts: number; errors: number }>()
+    const stat = new Map<string, typeof d.attempts>()
     for (const a of d.attempts) {
+      if (a.key_status === 'anulada' || a.is_correct == null) continue
       for (const t of qTopic.get(a.question_id) ?? []) {
-        const s = stat.get(t) ?? { attempts: 0, errors: 0 }
-        const g = effectiveGrade(a) // gabarito oficial prevalece; anulada não conta
-        if (g === 'acertei' || g === 'errei') {
-          s.attempts++
-          if (g === 'errei') s.errors++
-        }
+        const s = stat.get(t) ?? []
+        s.push(a)
         stat.set(t, s)
       }
     }
@@ -57,11 +54,11 @@ export function useDerived(d: StudyData, minutesOverride?: number) {
     }
     const signals: TopicSignal[] = leaves.map((t) => {
       const p = prog.get(t.id)
-      const s = stat.get(t.id), o = overdue.get(t.id)
+      const s = verifiedDistinct(stat.get(t.id) ?? []), o = overdue.get(t.id)
       return {
         topicId: t.id, name: t.name, status: p?.status ?? 'nao_iniciado', confidence: p?.confidence ?? 0,
         lastStudiedAt: p?.last_studied_at ? new Date(p.last_studied_at) : null,
-        overdueCards: o?.n ?? 0, maxOverdueDays: o?.maxDays ?? 0, attempts: s?.attempts ?? 0, errors: s?.errors ?? 0,
+        overdueCards: o?.n ?? 0, maxOverdueDays: o?.maxDays ?? 0, attempts: s.attempts, errors: s.errors,
       }
     })
     const ranked: Scored[] = rankTopics(signals, now)
