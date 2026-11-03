@@ -18,6 +18,10 @@ const Revisoes = lazy(() => import('@/features/revisoes/Revisoes'))
 const Redacao = lazy(() => import('@/features/redacao/Redacao'))
 const Analise = lazy(() => import('@/features/relatorios/Analise'))
 const Config = lazy(() => import('@/features/config/Config'))
+const StudyPlan = lazy(() => import('@/features/ciclos/StudyPlan'))
+const StudyMap = lazy(() => import('@/features/ciclos/StudyMap'))
+const Passages = lazy(() => import('@/features/ciclos/Passages'))
+const GuidedSession = lazy(() => import('@/features/ciclos/GuidedSession'))
 
 export function App() {
   return (
@@ -30,6 +34,10 @@ export function App() {
           <Route path="edital" element={<Edital />} />
           <Route path="edital/:topicId" element={<NotasPage />} />
           <Route path="agenda" element={<Agenda />} />
+          <Route path="plano" element={<StudyPlan />} />
+          <Route path="mapa" element={<StudyMap />} />
+          <Route path="passagens" element={<Passages />} />
+          <Route path="sessao" element={<GuidedSession />} />
           <Route path="questoes" element={<Questoes />} />
           <Route path="questoes/classificar" element={<Classificar />} />
           <Route path="questoes/:id" element={<QuestaoPage />} />

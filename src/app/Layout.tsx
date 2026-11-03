@@ -7,13 +7,16 @@ import { useOnline } from '@/lib/pwa'
 
 const NAV = [
   { to: '/', label: 'Hoje', icon: Home, end: true },
+  { to: '/plano', label: 'Meu plano', icon: ClipboardList },
+  { to: '/mapa', label: 'Mapa de estudos', icon: CalendarDays },
+  { to: '/passagens', label: 'Passagens', icon: ListChecks },
   { to: '/edital', label: 'Edital', icon: BookOpen },
   { to: '/agenda', label: 'Agenda', icon: CalendarDays },
   { to: '/questoes', label: 'Questões', icon: ListChecks },
   { to: '/simulados', label: 'Simulados', icon: ClipboardList },
   { to: '/revisoes', label: 'Revisões', icon: RotateCcw },
   { to: '/redacao', label: 'Redação', icon: PenLine },
-  { to: '/analise', label: 'Análise', icon: BarChart3 },
+  { to: '/analise', label: 'Desempenho', icon: BarChart3 },
   { to: '/config', label: 'Config', icon: Cog },
 ]
 const MOBILE = ['/', '/questoes', '/revisoes', '/agenda', '/config']

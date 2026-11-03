@@ -29,7 +29,7 @@ vi.mock('@/lib/api', () => {
 
 import { QuestionView } from '@/features/questoes/QuestionView'
 import { AnswerPanel } from '@/features/questoes/AnswerPanel'
-import Dashboard from '@/features/dashboard/Dashboard'
+import Dashboard from '@/features/dashboard/LegacyDashboard'
 import SimuladoRun from '@/features/simulados/SimuladoRun'
 import type { Question } from '@/types/db'
 
@@ -74,7 +74,7 @@ describe('questão: fidelidade e gabarito só após responder', () => {
   })
 })
 
-describe('dashboard', () => {
+describe('dashboard legado preservado', () => {
   it('21/50 aparece só como base declarada; prova "a confirmar"; sem simulado não há gráfico de resultado', async () => {
     wrap(<Dashboard />)
     expect(await screen.findByText('Base 2026 (declarada)')).toBeInTheDocument()

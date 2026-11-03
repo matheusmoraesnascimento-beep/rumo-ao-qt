@@ -16,7 +16,8 @@
     "seed:gen": "tsx scripts/gerar-seed.ts",
     "gabaritos:extrair": "tsx scripts/extrair-gabaritos.ts",
     "gabaritos:seed": "tsx scripts/gerar-seed-gabaritos.ts",
-    "enviar:imagens": "tsx scripts/enviar-imagens.ts"
+    "enviar:imagens": "tsx scripts/enviar-imagens.ts",
+    "test:e2e:cycles": "playwright test --config playwright.cycles.config.ts"
   },
   "devDependencies": {
     "@electric-sql/pglite": "^0.5.11",

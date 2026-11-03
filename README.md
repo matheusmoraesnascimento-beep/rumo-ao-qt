@@ -29,7 +29,21 @@ Ferramenta independente de estudos. Não oficial e sem vínculo com a Marinha do
 
 **Não implementado (honesto):** editor `/admin/conferencia` de OCR (a revisão é feita por SQL/CLI, veja `docs/IMPORTACAO_QUESTOES.md`); modo offline de verdade (o app abre sem rede, mas dados e gravações exigem internet); FSRS; IA para redação.
 
-**Ciclos e passagens:** a evolução está em andamento. O planejador atual fornece sugestões, mas ainda não persiste ciclos, cursor ou passagens. A auditoria do banco implantado é necessária antes de criar migrations; consulte `docs/AUDITORIA_BANCO_E_APLICACAO.md`, `docs/REGRAS_CICLOS_PASSAGENS.md` e `docs/MIGRACAO_PAPIRO_LIKE.md`.
+**Ciclos e passagens:** há implementação no repositório para plano pessoal, mapa, sessão guiada persistente, passagem auditada e diagnóstico por janela. A proposta SQL `supabase/proposals/20261103000008_cycles_passages.sql` é **candidata local; não foi aplicada ao Supabase hospedado**. Sem ela, a prévia do plano continua disponível e a ativação fica bloqueada; o painel anterior e o histórico continuam acessíveis. Publicar o frontend não migra o banco. Consulte [auditoria](docs/AUDITORIA_BANCO_E_APLICACAO.md), [regras](docs/REGRAS_CICLOS_PASSAGENS.md), [migração](docs/MIGRACAO_PAPIRO_LIKE.md) e [validação](docs/VALIDACAO_IMPLANTACAO.md).
+
+A aba **Edital** mantém sua árvore, IDs, anotações, aulas e critérios anteriores. O seed local contém 158 nós, sendo 122 assuntos-folha do CP-T/Informática 2026; o progresso pessoal declarado de **17/122** não pôde ser conferido remotamente nesta sessão. Adotar ciclos não converte esse progresso em passagens automaticamente. As regras `cycles-v1` são próprias e auditáveis; não reproduzem um algoritmo proprietário do Método Papiro.
+
+## Uso em cinco minutos
+
+Este fluxo persistente exige a migration validada e instalada no ambiente; enquanto isso, use a prévia e os módulos anteriores.
+
+1. Abra **Meu plano** (`#/plano`), selecione o concurso e a versão real do edital e confira a disponibilidade já salva. Os defaults de 120 min de segunda a sexta e 0 min no fim de semana preenchem apenas dados ausentes; deixe a data da prova vazia enquanto estiver a confirmar.
+2. Clique em **Pré-visualizar plano**, confira todos os assuntos, ajuste ordem, minutos, peso e pausas. **Ativar plano** confirma também os horários e metas mostrados; não apaga o histórico. Use uma exceção por data para plantão, viagem ou dia curto.
+3. Em **Hoje**, leia o motivo do próximo estudo e abra a sessão guiada. Inicie, pause e retome quando necessário. Registre o conteúdo e a dificuldade. **Salvar sessão parcial** guarda o tempo e mantém o assunto pendente; concluir a passagem exige os objetivos e a evidência nas notas.
+4. Acompanhe **Mapa** e **Passagens**. A cobertura da disciplina exige todos os assuntos-folha; minutos ou revisão isolada não concluem uma passagem. Para reconhecer estudo antigo, confira a prévia da equivalência de um assunto e justifique; para corrigir, reabra a etapa com motivo.
+5. Em **Revisões**, veja o assunto e a data, copie o roteiro e revise no ChatGPT por sua própria conta. Depois registre a dificuldade e confira a próxima data retornada pelo aplicativo. Notas não são enviadas automaticamente ao ChatGPT. Em **Desempenho**, compare amostra, período e resultados verificados/autodeclarados separados.
+
+Rotas do recurso: `#/` (Hoje), `#/plano`, `#/mapa`, `#/sessao?item=ID`, `#/passagens?topico=ID`, `#/revisoes` e `#/analise`. As rotas anteriores de Edital, Agenda, Questões, Simulados, Redação e Config continuam disponíveis.
 
 ## Pré-requisitos
 
@@ -47,6 +61,8 @@ Sem `.env.local` o app abre na tela "Configuração pendente" (não quebra).
 
 ## 2. Criar o projeto Supabase (passo a passo)
 
+Estas instruções de criação são para **projeto novo e vazio**. Em um projeto existente, não execute seed, reset nem `db push` indiscriminado: siga primeiro o procedimento de auditoria, backup restaurável e homologação em [Migração](docs/MIGRACAO_PAPIRO_LIKE.md). O exportador JSON do aplicativo não substitui esse backup.
+
 1. https://supabase.com/dashboard → **New project** (guarde a senha do banco).
 2. **Project Settings → API**: copie **Project URL** e a chave **anon / publishable**. **Nunca** copie a `service_role`/`secret` para o front, para o GitHub ou para commits.
 3. **SQL Editor → New query**: cole e execute, **nesta ordem**:
@@ -56,11 +72,13 @@ Sem `.env.local` o app abre na tela "Configuração pendente" (não quebra).
    3b. `supabase/migrations/20261024000004_storage_admin_upload.sql` (permite que administradores enviem recortes sem usar a service_role)
    3c. `supabase/migrations/20261024000005_answer_keys.sql` (gabaritos oficiais, RPCs de conferência e marcação de anuladas)
    3d. `supabase/migrations/20261024000006_push_reminders.sql` (inscrições de push, horário do lembrete e RPCs do remetente)
+   3e. `supabase/migrations/20261026000007_notas_aulas.sql` (anotações, aulas e revisão por assunto)
+   3f. `supabase/proposals/20261103000008_cycles_passages.sql` é candidata: confira sua validação local e os gates documentados antes da instalação. Não instalar automaticamente em produção.
    4. `supabase/seed.sql` (provas, edital provisório, temas de redação)
    5. `supabase/seed_questoes.sql` (250 questões; gerado localmente, **não vai ao Git** — veja "Provas e direitos")
    6. `supabase/seed_gabaritos.sql` (gerado com `npm run gabaritos:extrair` e `npm run gabaritos:seed` a partir dos PDFs oficiais; **não vai ao Git** — veja `docs/IMPORTACAO_QUESTOES.md`)
 
-   Alternativa com a CLI: `supabase link --project-ref SEU_REF` e `supabase db push`; depois `psql "$DATABASE_URL" -f supabase/seed.sql -f supabase/seed_questoes.sql`.
+   A CLI também pode aplicar migrations a um ambiente vazio de desenvolvimento. Confira o destino e as migrations pendentes; a candidata de ciclos exige os gates documentados. Seeds destinam-se à instalação inicial, não à adoção dos ciclos em conta existente.
 4. **Authentication → Providers → Email**: habilitado. Recomendado manter "Confirm email" ligado.
 5. **Authentication → URL Configuration**:
    - **Site URL**: `https://SEU-USUARIO.github.io/NOME-DO-REPO/`
@@ -82,8 +100,8 @@ Sem `.env.local` o app abre na tela "Configuração pendente" (não quebra).
 3. **Settings → Secrets and variables → Actions → aba Variables → New repository variable**:
    - `VITE_SUPABASE_URL` = Project URL
    - `VITE_SUPABASE_ANON_KEY` = chave **anon/publishable** (pública por definição; a proteção é a RLS)
-4. `git push` na `main` dispara `.github/workflows/deploy.yml`: `npm ci` → lint → typecheck → testes → build → varredura de segredos → deploy → smoke test da URL.
-5. Acesse `https://SEU-USUARIO.github.io/NOME-DO-REPO/`, crie sua conta e confirme o e-mail.
+4. Após os checks locais, `git push` na `main` dispara `.github/workflows/deploy.yml`: `npm ci` → lint → typecheck → testes → build → varredura de segredos → deploy → smoke test da URL.
+5. Acesse `https://SEU-USUARIO.github.io/NOME-DO-REPO/`, crie sua conta e confirme o e-mail. Em instalação existente, use a conta atual. Consulte [Validação e implantação](docs/VALIDACAO_IMPLANTACAO.md) para o estado efetivamente verificado do rollout de ciclos.
 
 Rotas ficam em `/NOME-DO-REPO/#/estudos`; refresh e deep link funcionam sem regras de rewrite.
 

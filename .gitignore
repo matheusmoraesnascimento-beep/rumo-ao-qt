@@ -12,3 +12,4 @@ dados/
 referencias/
 supabase/seed_questoes.sql
 supabase/seed_gabaritos.sql
+.vitest/

@@ -7,7 +7,12 @@ import { defineConfig, devices } from '@playwright/test'
 export default defineConfig({
   testDir: 'tests/e2e',
   timeout: 30_000,
-  use: { baseURL: 'http://localhost:4173' },
+  use: {
+    baseURL: 'http://localhost:4173',
+    launchOptions: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE
+      ? { executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE }
+      : undefined,
+  },
   projects: [
     { name: 'desktop', use: { ...devices['Desktop Chrome'], channel: 'chromium' } },
     { name: 'mobile', use: { ...devices['Pixel 7'], channel: 'chromium' } },
@@ -18,6 +23,13 @@ export default defineConfig({
     reuseExistingServer: true,
     timeout: 120_000,
     // Variáveis do processo vencem o .env.local: o E2E nunca fala com o Supabase real.
-    env: { VITE_APP_BASE_PATH: '/rumo-ao-qt/', VITE_CONFIG_NATIVE_IGNORE_WARNING: 'true', VITE_SUPABASE_URL: '', VITE_SUPABASE_ANON_KEY: '', VITE_VAPID_PUBLIC_KEY: 'BNcRdreALRFXTkOOUHK1EtK2wtaz5Ry4YfYCA_0QTpQtUbVlUls0VJXg7A8u-Ts1XbjhazAkj7I99e8QcYP7DkM' },
+    env: {
+      VITE_APP_BASE_PATH: '/rumo-ao-qt/',
+      VITE_CONFIG_NATIVE_IGNORE_WARNING: 'true',
+      VITE_SUPABASE_URL: '',
+      VITE_SUPABASE_ANON_KEY: '',
+      VITE_VAPID_PUBLIC_KEY:
+        'BNcRdreALRFXTkOOUHK1EtK2wtaz5Ry4YfYCA_0QTpQtUbVlUls0VJXg7A8u-Ts1XbjhazAkj7I99e8QcYP7DkM',
+    },
   },
 })

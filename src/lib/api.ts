@@ -162,7 +162,7 @@ export const simulationReview = async (id: string) => ok(await supabase.rpc('sim
 // ---- revisões ----
 export const getCards = async () =>
   ok(await supabase.from('review_cards').select('*').order('due_at').limit(5000)) as ReviewCard[]
-export async function createCard(c: { front: string; back?: string; topic_id?: string | null; question_id?: string | null; due_at?: string }) {
+export async function createCard(c: { front: string; back?: string; topic_id?: string | null; question_id?: string | null; due_at?: string; kind?: 'card' | 'aula' }) {
   return ok(await supabase.from('review_cards').insert({ user_id: await uid(), back: '', ...c }).select().single()) as ReviewCard
 }
 export async function deleteCard(id: string) { ok(await supabase.from('review_cards').delete().eq('id', id)) }
