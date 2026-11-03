@@ -5,6 +5,7 @@ import { errMsg, fmtDateTime } from '@/lib/utils'
 import { useIdempotentCommand, useRefreshCycles } from './api'
 import { useCycles } from './useCycles'
 import { CycleGate, linkClass } from './shared'
+import { ImportLegacy } from './ImportLegacy'
 export default function Passages() {
   const d = useCycles(),
     refresh = useRefreshCycles()
@@ -56,6 +57,7 @@ export default function Passages() {
           </Link>
         }
       />
+      <ImportLegacy d={d} />
       <Card>
         <Field label="Assunto">
           <Select
