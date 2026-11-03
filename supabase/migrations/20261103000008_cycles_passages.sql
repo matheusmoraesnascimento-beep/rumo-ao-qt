@@ -1,5 +1,5 @@
--- CANDIDATA LOCAL: schema de produção não auditado; exige backup restaurável e clone antes de aplicar.
 -- Aditiva: não altera progresso, gabaritos, revisões nem sessões legadas.
+-- Pré-auditoria 03/11/2026: tabelas dependentes existem com RLS; topic_progress=17, topics=158, review_cards=18.
 create table if not exists public.study_plans (
  id uuid primary key default gen_random_uuid(), user_id uuid not null references auth.users(id) on delete cascade,
  syllabus_version_id uuid not null references public.syllabus_versions(id), exam_id uuid references public.exams(id),

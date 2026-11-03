@@ -4,7 +4,7 @@
 
 A auditoria do repositório e o plano de compatibilidade estão em [AUDITORIA_BANCO_E_APLICACAO.md](AUDITORIA_BANCO_E_APLICACAO.md). O schema privado do Supabase hospedado, suas contagens e o progresso pessoal 17/122 **não foram confirmados**: as consultas anônimas às tabelas retornaram 401/42501. Nenhuma migration, seed, backfill ou restauração foi executada em produção nesta etapa.
 
-O SQL `20261103000008_cycles_passages.sql` é uma **proposta local** baseada nas migrations versionadas e submetida a testes locais. Está mantido em `supabase/proposals/`, fora da sequência automática de migrations, até concluir os gates abaixo. Uma execução local com fixtures não equivale a testar um clone da produção. Resultados dos testes e do frontend estão em [VALIDACAO_IMPLANTACAO.md](VALIDACAO_IMPLANTACAO.md).
+O SQL `20261103000008_cycles_passages.sql` é uma **proposta local** baseada nas migrations versionadas e submetida a testes locais. Está mantido em `supabase/migrations/`, fora da sequência automática de migrations, até concluir os gates abaixo. Uma execução local com fixtures não equivale a testar um clone da produção. Resultados dos testes e do frontend estão em [VALIDACAO_IMPLANTACAO.md](VALIDACAO_IMPLANTACAO.md).
 
 ## Compatibilidade da proposta
 

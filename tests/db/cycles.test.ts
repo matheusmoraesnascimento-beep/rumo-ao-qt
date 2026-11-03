@@ -2,7 +2,7 @@
 import { beforeAll, afterAll, describe, expect, it } from 'vitest'
 import { readFileSync } from 'node:fs'
 import { createDb, createUser, asUser, err, type Db } from './harness'
-const migration = readFileSync('supabase/proposals/20261103000008_cycles_passages.sql', 'utf8')
+const migration = readFileSync('supabase/migrations/20261103000008_cycles_passages.sql', 'utf8')
 let db: Db, a: string, b: string, version: string, topics: string[], plan: string, item: string
 const key = () => crypto.randomUUID()
 async function command(op: string, data: object, clientKey = key()) {

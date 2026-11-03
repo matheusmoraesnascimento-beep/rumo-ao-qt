@@ -29,7 +29,7 @@ Ferramenta independente de estudos. Não oficial e sem vínculo com a Marinha do
 
 **Não implementado (honesto):** editor `/admin/conferencia` de OCR (a revisão é feita por SQL/CLI, veja `docs/IMPORTACAO_QUESTOES.md`); modo offline de verdade (o app abre sem rede, mas dados e gravações exigem internet); FSRS; IA para redação.
 
-**Ciclos e passagens:** há implementação no repositório para plano pessoal, mapa, sessão guiada persistente, passagem auditada e diagnóstico por janela. A proposta SQL `supabase/proposals/20261103000008_cycles_passages.sql` é **candidata local; não foi aplicada ao Supabase hospedado**. Sem ela, a prévia do plano continua disponível e a ativação fica bloqueada; o painel anterior e o histórico continuam acessíveis. Publicar o frontend não migra o banco. Consulte [auditoria](docs/AUDITORIA_BANCO_E_APLICACAO.md), [regras](docs/REGRAS_CICLOS_PASSAGENS.md), [migração](docs/MIGRACAO_PAPIRO_LIKE.md) e [validação](docs/VALIDACAO_IMPLANTACAO.md).
+**Ciclos e passagens:** há implementação no repositório para plano pessoal, mapa, sessão guiada persistente, passagem auditada e diagnóstico por janela. A proposta SQL `supabase/migrations/20261103000008_cycles_passages.sql` é **candidata local; não foi aplicada ao Supabase hospedado**. Sem ela, a prévia do plano continua disponível e a ativação fica bloqueada; o painel anterior e o histórico continuam acessíveis. Publicar o frontend não migra o banco. Consulte [auditoria](docs/AUDITORIA_BANCO_E_APLICACAO.md), [regras](docs/REGRAS_CICLOS_PASSAGENS.md), [migração](docs/MIGRACAO_PAPIRO_LIKE.md) e [validação](docs/VALIDACAO_IMPLANTACAO.md).
 
 A aba **Edital** mantém sua árvore, IDs, anotações, aulas e critérios anteriores. O seed local contém 158 nós, sendo 122 assuntos-folha do CP-T/Informática 2026; o progresso pessoal declarado de **17/122** não pôde ser conferido remotamente nesta sessão. Adotar ciclos não converte esse progresso em passagens automaticamente. As regras `cycles-v1` são próprias e auditáveis; não reproduzem um algoritmo proprietário do Método Papiro.
 
@@ -73,7 +73,7 @@ Estas instruções de criação são para **projeto novo e vazio**. Em um projet
    3c. `supabase/migrations/20261024000005_answer_keys.sql` (gabaritos oficiais, RPCs de conferência e marcação de anuladas)
    3d. `supabase/migrations/20261024000006_push_reminders.sql` (inscrições de push, horário do lembrete e RPCs do remetente)
    3e. `supabase/migrations/20261026000007_notas_aulas.sql` (anotações, aulas e revisão por assunto)
-   3f. `supabase/proposals/20261103000008_cycles_passages.sql` é candidata: confira sua validação local e os gates documentados antes da instalação. Não instalar automaticamente em produção.
+   3f. `supabase/migrations/20261103000008_cycles_passages.sql` é candidata: confira sua validação local e os gates documentados antes da instalação. Não instalar automaticamente em produção.
    4. `supabase/seed.sql` (provas, edital provisório, temas de redação)
    5. `supabase/seed_questoes.sql` (250 questões; gerado localmente, **não vai ao Git** — veja "Provas e direitos")
    6. `supabase/seed_gabaritos.sql` (gerado com `npm run gabaritos:extrair` e `npm run gabaritos:seed` a partir dos PDFs oficiais; **não vai ao Git** — veja `docs/IMPORTACAO_QUESTOES.md`)
